@@ -23,7 +23,7 @@
 html,body{margin:0}
 :root{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
-#app{max-width:560px;margin:0 auto;padding:12px 16px calc(32px + env(safe-area-inset-bottom))}
+#app{max-width:560px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16pxcalc(32px + env(safe-area-inset-bottom))}
 .top{display:flex;align-items:center;gap:10px;min-height:48px;margin-bottom:8px}
 .top h1{font-size:18px;margin:0;flex:1;line-height:1.2}
 .back{border:0;background:none;color:var(--ink);font-size:26px;line-height:1;padding:6px 10px 8px 0;cursor:pointer}
@@ -56,7 +56,17 @@ button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:
 .brand{text-align:center;margin:8px 0 16px}
 .brand h1{font-size:23px;line-height:1.2;margin:0}
 .c3t{font-family:"Saira",system-ui,sans-serif;font-weight:600;font-size:13px;letter-spacing:.17em;color:#8493A4;margin-top:5px}
-.c3t b{font-weight:600;color:#EA3A2F}
+.c3t b{font-weight:600;color:#EA3A2F;display:inline-block;animation:c3t-flash 6s 1.4s infinite}
+.brand.intro h1{animation:brand-in .5s ease-out both}
+.brand.intro .c3t{animation:c3t-in 1s .25s ease-out both}
+@keyframes brand-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes c3t-in{from{opacity:0;letter-spacing:.6em}to{opacity:1;letter-spacing:.17em}}
+@keyframes c3t-flash{
+  0%,13%,100%{opacity:1;transform:scale(1);text-shadow:none}
+  3%,9%{opacity:1;transform:scale(1.35);text-shadow:0 0 12px #EA3A2F,0 0 3px #EA3A2F}
+  6%{opacity:.35;transform:scale(1);text-shadow:none}
+}
+@media (prefers-reduced-motion: reduce){.c3t b,.brand.intro h1,.brand.intro .c3t{animation:none}}
 .rank{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
 .badge{width:56px;height:56px;border-radius:50%;background:var(--card);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
 .bar.gold{margin-top:5px}.bar.gold i{background:var(--gold)}
@@ -230,6 +240,10 @@ function toggleTheme(){
   try{localStorage.setItem('ept-theme',THEME)}catch(e){}
   applyTheme();draw();
 }
+/* Always open at the top: phones otherwise restore the last scroll position on reload */
+try{history.scrollRestoration='manual'}catch(e){}
+window.addEventListener('pageshow',()=>{window.scrollTo(0,0);setTimeout(()=>window.scrollTo(0,0),60)});
+let introDone=false;
 let S={};
 try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
 S.s=S.s||{};S.xp=S.xp||0;S.streak=S.streak||0;S.last=S.last||'';S.numBest=S.numBest||0;
@@ -289,9 +303,9 @@ function overall(){
 
 function home(){
   missions();save();
-  const r=rank(),d=today();
+  const r=rank(),d=today(),first=!introDone;introDone=true;
   return [
-    $('div',{class:'brand'},$('h1',{},'Engineer Practical Trainer'),
+    $('div',{class:'brand'+(first?' intro':'')},$('h1',{},'Engineer Practical Trainer'),
       $('div',{class:'c3t','aria-label':'By Code 3 Tek'},'BY CODE',$('b',{},'3'),'TEK')),
     $('div',{class:'rank'},
       $('div',{class:'badge'},'\u{1F6E1}️'),
