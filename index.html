@@ -62,7 +62,13 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .t-purple{background:var(--t-purple);color:var(--t-purple-ink)}.t-teal{background:var(--t-teal);color:var(--t-teal-ink)}
 .t-amber{background:var(--t-amber);color:var(--t-amber-ink)}
 button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
-.brand{text-align:center;margin:8px 0 16px}
+.brand{position:relative;overflow:hidden;text-align:center;color:#fff;
+  margin:calc(-12px - env(safe-area-inset-top)) -16px 16px;
+  padding:calc(150px + env(safe-area-inset-top)) 16px 16px;
+  background:#07090c url(hero.jpg) 62% 42%/cover no-repeat;border-radius:0 0 20px 20px}
+.brand::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(7,9,12,.2) 0%,rgba(7,9,12,.08) 45%,rgba(7,9,12,.9) 100%)}
+.brand>*{position:relative}
+.brand h1{text-shadow:0 1px 10px rgba(0,0,0,.7)}
 .brand h1{font-size:23px;line-height:1.2;margin:0}
 .c3t{font-family:"Saira",system-ui,sans-serif;font-weight:600;font-size:13px;letter-spacing:.17em;color:#8493A4;margin-top:5px}
 .c3t b{font-weight:600;color:#EA3A2F;display:inline-block;animation:c3t-flash 6s 1.4s infinite}
