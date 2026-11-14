@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Engineer Practical Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4f2ee; --card:#ffffff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded6;
@@ -50,6 +53,10 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .t-purple{background:var(--t-purple);color:var(--t-purple-ink)}.t-teal{background:var(--t-teal);color:var(--t-teal-ink)}
 .t-amber{background:var(--t-amber);color:var(--t-amber-ink)}
 button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+.brand{text-align:center;margin:8px 0 16px}
+.brand h1{font-size:23px;line-height:1.2;margin:0}
+.c3t{font-family:"Saira",system-ui,sans-serif;font-weight:600;font-size:13px;letter-spacing:.17em;color:#8493A4;margin-top:5px}
+.c3t b{font-weight:600;color:#EA3A2F}
 .rank{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
 .badge{width:56px;height:56px;border-radius:50%;background:var(--t-amber);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
 .bar.gold{margin-top:5px}.bar.gold i{background:var(--gold)}
@@ -284,6 +291,8 @@ function home(){
   missions();save();
   const r=rank(),d=today();
   return [
+    $('div',{class:'brand'},$('h1',{},'Engineer Practical Trainer'),
+      $('div',{class:'c3t','aria-label':'By Code 3 Tek'},'BY CODE',$('b',{},'3'),'TEK')),
     $('div',{class:'rank'},
       $('div',{class:'badge'},'\u{1F6E1}️'),
       $('div',{style:'flex:1;min-width:0'},
