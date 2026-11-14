@@ -118,7 +118,13 @@ button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:
 .steps li{padding:7px 0;border-bottom:1px solid var(--line)}
 .steps li:last-child{border-bottom:0}
 .d1{padding-left:18px!important}.d2{padding-left:36px!important}.d3{padding-left:54px!important}
-.miss{color:var(--bad)}.hit{color:var(--good)}
+.miss{color:var(--bad)}.hit{color:var(--good)}.late{color:var(--warn)}
+:root{--warn:#8A5A00}:root[data-theme="dark"]{--warn:#E6B23C}
+.mic{width:120px;height:120px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);font-size:52px;display:block;margin:18px auto 8px;cursor:pointer}
+.mic.on{animation:mic 1.4s ease-in-out infinite}
+@keyframes mic{0%,100%{box-shadow:0 0 0 0 rgba(234,58,47,.55)}50%{box-shadow:0 0 0 18px rgba(234,58,47,0)}}
+.heard{min-height:44px;font-size:14px;color:var(--muted);text-align:center;margin:4px 0 10px}
+.tapfix li{cursor:pointer}
 .blank{color:var(--muted);letter-spacing:.08em}
 .seg{display:flex;gap:6px;margin:10px 0}
 .seg button{flex:1;font:inherit;font-size:14px;padding:9px 4px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
@@ -281,8 +287,10 @@ function $(t,a,...c){
 }
 const app=document.getElementById('app');
 const stack=[];
-function go(fn){stack.push(fn);draw()}
-function back(n){for(let i=0;i<(n||1)&&stack.length>1;i++)stack.pop();draw()}
+let onLeave=null;
+const leave=()=>{if(onLeave){const f=onLeave;onLeave=null;f()}};
+function go(fn){leave();stack.push(fn);draw()}
+function back(n){leave();for(let i=0;i<(n||1)&&stack.length>1;i++)stack.pop();draw()}
 function draw(){app.replaceChildren(...stack[stack.length-1]().flat(Infinity).filter(x=>x!=null&&x!==false));toTop()}
 function hdr(title,right){
   return $('div',{class:'top'},stack.length>1&&$('button',{class:'back','aria-label':'Back',onclick:()=>back()},'‹'),$('h1',{},title),right);
@@ -337,8 +345,10 @@ function home(){
         $('span',{class:'dot'},d.paid[i]?'✓':''),$('span',{style:'flex:1'},m[0]),$('span',{class:'xp'},'+'+m[1])))),
     $('button',{class:'btn',onclick:()=>go(path)},'\u{1F692} Study path',$('small',{},'Work through every section in order')),
     $('h2',{},'Or pick how to practice'),
-    $('div',{class:'tiles'},MODES.map(m=>$('button',{class:'tile '+m.cls,onclick:()=>go(()=>pick(m))},
+    $('div',{class:'tiles'},MODES.slice(0,4).map(m=>$('button',{class:'tile '+m.cls,onclick:()=>go(()=>pick(m))},
       $('span',{class:'ico'},m.ico),m.name))),
+    $('button',{class:'tile wide t-blue',onclick:()=>go(()=>pick(MODES[4]))},
+      $('span',{class:'ico'},MODES[4].ico),$('span',{style:'flex:1'},MODES[4].name),$('span',{class:'sub2'},'Uses the microphone')),
     $('button',{class:'tile wide t-amber',onclick:()=>go(numbers())},
       $('span',{class:'ico'},'⏱️'),$('span',{style:'flex:1'},'Numbers round'),
       $('span',{class:'sub2'},S.numBest?'Best '+S.numBest+' of 10':'Pressures and speeds')),
@@ -386,7 +396,8 @@ const MODES=[
   {ico:'📖',cls:'t-blue',name:'Read and learn',desc:'See the steps, then hide the words and test yourself',start:g=>study(g)},
   {ico:'➡️',cls:'t-coral',name:'What comes next?',desc:'You are shown the previous step and pick the one that follows',start:g=>nextDrill(g,g.steps.map(s=>s.i))},
   {ico:'🔢',cls:'t-purple',name:'Put in order',desc:'Tap shuffled steps back into the right sequence',start:g=>orderDrill(g)},
-  {ico:'🧠',cls:'t-teal',name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)}
+  {ico:'🧠',cls:'t-teal',name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)},
+  {ico:'🎤',cls:'t-blue',name:'Say it out loud',desc:'Recite the steps and it marks the ones you missed',start:g=>spokenDrill(g)}
 ];
 let MODE=MODES[1],openSec=DATA[0].id;
 function pick(m){
@@ -499,7 +510,7 @@ function orderDrill(g){
 }
 
 /* From memory: type items, loose matching against the list */
-const STOP=new Set('check the all for and of to a an or is are on in your any be it its with as that if at from into this'.split(' '));
+const STOP=new Set('check the all for and of to a an or is are on in your any be it its with as that if at from into this then should will'.split(' '));
 const toks=t=>t.toLowerCase().replace(/[^a-z0-9/½ ]+/g,' ').split(' ').filter(w=>w&&!STOP.has(w)).map(w=>w.length>3?w.replace(/(es|s)$/,''):w);
 const same=(a,b)=>a===b||(a.length>=4&&b.length>=4&&(a.startsWith(b)||b.startsWith(a)));
 function matchScore(input,target){
@@ -538,6 +549,112 @@ function recallDrill(g){
       input,$('p',{class:'msg'},msg),
       $('ul',{class:'steps card'},g.steps.map(s=>$('li',{class:'d'+s.d+(found.has(s.i)?'':' blank')},found.has(s.i)?s.t:'· · ·'))),
       $('button',{class:'btn ghost',onclick:()=>{done=true;draw()}},'I\'m done, show what I missed')];
+  };
+}
+
+/* Say it out loud: the phone listens while you recite, and marks steps as it hears them */
+const getSR=()=>window.SpeechRecognition||window.webkitSpeechRecognition;
+/* Words that set a step apart from the others in its part count for more */
+function speechKeys(g){
+  if(g.keys)return g.keys;
+  const df={};
+  const K=t=>[...new Set(toks(t))];
+  g.keys=g.steps.map(s=>{
+    const t=s.t.replace(/\([^)]*\)/g,' '),parts=t.split(/ or /i),v=[K(t)];
+    if(parts.length===2)parts.forEach(x=>{const k=K(x);if(k.length)v.push(k)});
+    return v;
+  });
+  g.steps.forEach(s=>new Set(toks(s.t)).forEach(t=>{df[t]=(df[t]||0)+1}));
+  g.wt=t=>1/(df[t]||1);
+  return g.keys;
+}
+function spokenDrill(g){
+  const keys=speechKeys(g),found=new Map();
+  let state='idle',heard='',prev=[],recog=null,err='',paid=false,els={},liveEl=null,cntEl=null,barEl=null;
+  /* Returns the steps newly matched by a finished stretch of speech.
+     Best matches claim their words first, so a near-identical step is not marked by the same words. */
+  const feed=text=>{
+    const cur=toks(text),win=prev.concat(cur),cands=[],claimed=new Set(),usedText=new Set();
+    prev=cur.slice(-12);
+    g.steps.forEach(s=>{
+      const vs=keys[s.i];
+      if(found.has(s.i)||!vs[0].length)return;
+      let best=null;
+      vs.forEach(k=>{
+        let hit=0,all=0;const hits=[];
+        k.forEach(t=>{const w=g.wt(t);all+=w;if(win.some(y=>same(t,y))){hit+=w;hits.push(t)}});
+        const sc=hit/all;
+        if(sc>=(k.length>6?0.5:0.6)&&(!best||sc>best.sc))best={s,sc,hits};
+      });
+      if(best)cands.push(best);
+    });
+    const got=[];
+    cands.sort((x,y)=>y.sc-x.sc||x.s.i-y.s.i).forEach(c=>{
+      const fresh=c.hits.some(t=>!claimed.has(t)&&cur.some(y=>same(t,y)));
+      if(usedText.has(c.s.t)||!fresh)return;
+      c.hits.forEach(t=>claimed.add(t));usedText.add(c.s.t);got.push(c.s);
+    });
+    got.sort((x,y)=>x.i-y.i).forEach(st=>found.set(st.i,[...found.keys()].some(j=>j>st.i)));
+    return got;
+  };
+  const show=got=>{
+    got.forEach(s=>{const e=els[s.i];if(e){e.textContent=s.t;e.className='d'+s.d+' hit'}});
+    if(cntEl)cntEl.textContent=found.size+' / '+g.steps.length;
+    if(barEl)barEl.style.width=Math.round(found.size/g.steps.length*100)+'%';
+  };
+  const stop=()=>{if(recog){recog.onend=null;recog.onresult=null;try{recog.stop()}catch(x){}recog=null}};
+  const start=()=>{
+    const SR=getSR();err='';
+    try{
+      recog=new SR();recog.lang='en-US';recog.continuous=true;recog.interimResults=true;
+      recog.onresult=e=>{
+        let fin='',inter='';
+        for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=' '+r[0].transcript;else inter+=' '+r[0].transcript}
+        if(fin){heard=(heard+' '+fin).trim();show(feed(fin))}
+        if(liveEl)liveEl.textContent=(heard+' '+inter).trim().slice(-140);
+        if(found.size===g.steps.length)finish();
+      };
+      recog.onerror=e=>{
+        if(e.error==='not-allowed'||e.error==='service-not-allowed'){err='The microphone is blocked. Allow it for this site in your browser settings, then try again.';stop();state='idle';draw()}
+        else if(e.error==='audio-capture'){err='No microphone was found.';stop();state='idle';draw()}
+      };
+      /* Phones stop listening after a pause; start again until the user is done */
+      recog.onend=()=>{if(state==='on'&&recog){try{recog.start()}catch(x){}}};
+      recog.start();state='on';onLeave=stop;
+    }catch(x){err='Listening could not start on this browser.';state='idle'}
+    draw();
+  };
+  const finish=()=>{stop();onLeave=null;state='done';draw()};
+  const mark=(i,ok)=>{(S.s[g.id]=S.s[g.id]||{})[i]=ok?1:0};
+  return function view(){
+    if(state==='done'){
+      if(!paid){paid=true;g.steps.forEach(s=>rec(g,s.i,found.has(s.i)));today().parts++;missions();touchStreak();save()}
+      const late=[...found.values()].filter(Boolean).length;
+      return [hdr(g.title),$('p',{class:'big'},found.size+' / '+g.steps.length),
+        $('p',{class:'center sub'},found.size===g.steps.length?(late?'Every step, with '+late+' out of order.':'Every step, in order.'):'Red steps were not heard. Tap any step to change its mark.'),
+        $('ul',{class:'steps card tapfix'},g.steps.map(s=>{
+          const f=found.has(s.i),l=f&&found.get(s.i);
+          return $('li',{class:'d'+s.d+(f?(l?' late':' hit'):' miss'),onclick:()=>{f?found.delete(s.i):found.set(s.i,false);mark(s.i,!f);save();draw()}},
+            s.t,l?$('span',{class:'sub'},'  (said out of order)'):null);
+        })),
+        $('button',{class:'btn'+(found.size===g.steps.length?' ghost':''),onclick:()=>{stack.pop();go(spokenDrill(g))}},'Try again'),
+        nextPart(g,found.size===g.steps.length),
+        $('button',{class:'btn ghost',onclick:()=>back()},'Back to the list')];
+    }
+    if(!getSR())return [hdr(g.title),
+      $('div',{class:'card'},$('div',{class:'title'},'This browser cannot listen'),
+        $('p',{class:'sub'},'Spoken practice needs Chrome on Android or Safari on iPhone. You can type the steps instead.')),
+      $('button',{class:'btn',onclick:()=>{stack.pop();go(recallDrill(g))}},'Type it from memory')];
+    const on=state==='on';els={};
+    liveEl=$('div',{class:'heard'},on?(heard.slice(-140)||'Listening…'):'Tap the microphone, then say every step in this part, in order.');
+    cntEl=$('span',{class:'prog'},found.size+' / '+g.steps.length);
+    const b=bar(found.size/g.steps.length);barEl=b.firstChild;
+    return [hdr(g.title,cntEl),b,
+      $('button',{class:'mic'+(on?' on':''),'aria-label':on?'Stop listening':'Start listening',onclick:()=>on?finish():start()},on?'⏹':'\u{1F3A4}'),
+      liveEl,
+      err?$('p',{class:'msg miss',style:'text-align:center'},err):null,
+      on?$('button',{class:'btn',onclick:finish},"I'm done, show what I missed"):$('p',{class:'center sub'},'Your phone will ask to use the microphone the first time.'),
+      $('ul',{class:'steps card'},g.steps.map(s=>els[s.i]=$('li',{class:'d'+s.d+(found.has(s.i)?' hit':' blank')},found.has(s.i)?s.t:'· · ·')))];
   };
 }
 
