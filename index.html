@@ -45,6 +45,10 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .lbl:first-child{margin-top:0}
 .prev{font-size:18px;font-weight:650;border-left:4px solid var(--accent);padding-left:10px}
 .mode .sub{margin-top:2px}
+.placed{display:flex;gap:10px;align-items:flex-start;background:var(--good-bg);border:1.5px solid var(--good);border-radius:12px;padding:11px 14px;margin:6px 0;font-weight:600}
+.tick{color:var(--good);font-weight:800}
+.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.9);opacity:.2}60%{transform:scale(1.04);opacity:1}100%{transform:scale(1)}}
 .sec summary{list-style:none;cursor:pointer}
 .sec summary::-webkit-details-marker{display:none}
 .sec[open] summary{margin-bottom:8px}
@@ -321,21 +325,27 @@ function nextDrill(g,idxs){
 function orderDrill(g){
   const chunks=[];for(let i=0;i<g.steps.length;i+=5)chunks.push(g.steps.slice(i,i+5));
   if(chunks.length>1&&chunks[chunks.length-1].length<2)chunks[chunks.length-2].push(...chunks.pop());
-  let c=0,k=0,right=0,slip=false,tiles=null;const missed=[];
+  let c=0,k=0,right=0,slip=false,pop=false,tiles=null;const missed=[];
   return function view(){
     if(c>=chunks.length)return result(g,right,g.steps.length,missed);
     const ch=chunks[c];
     if(!tiles)tiles=shuffle(ch.slice(k).map(s=>s.t));
-    const placed=k>0?$('ul',{class:'steps card'},ch.slice(0,k).map(s=>$('li',{class:'d'+s.d},s.t))):
+    const wasPop=pop;pop=false;
+    const placed=k>0?[$('div',{class:'lbl'},'In order so far'),
+      ch.slice(0,k).map((s,n)=>$('div',{class:'placed'+(wasPop&&n===k-1?' pop':'')},$('span',{class:'tick'},'✓'),$('span',{},s.t))),
+      $('div',{class:'lbl',style:'margin-top:16px'},'Still to place')]:
       ch[0].i>0?$('div',{class:'card'},$('div',{class:'lbl'},'Continues after'),$('div',{class:'prev'},g.steps[ch[0].i-1].t)):null;
     const btns=tiles.map((t,ti)=>$('button',{class:'opt',onclick:e=>{
       const st=ch[k];
       if(t===st.t){
         if(slip)missed.push(st.i);else right++;
-        rec(g,st.i,!slip);save();slip=false;tiles.splice(ti,1);k++;
+        rec(g,st.i,!slip);save();slip=false;pop=true;tiles.splice(ti,1);k++;
         if(k>=ch.length){c++;k=0;tiles=null}
         draw();
-      }else{slip=true;e.currentTarget.classList.remove('shake');void e.currentTarget.offsetWidth;e.currentTarget.classList.add('shake')}
+      }else{
+        const b=e.currentTarget;slip=true;b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake','wrong');
+        setTimeout(()=>b.classList.remove('wrong'),600);
+      }
     }},t));
     const before=chunks.slice(0,c).reduce((a,x)=>a+x.length,0)+k;
     return [hdr(g.title,$('span',{class:'prog'},before+' / '+g.steps.length)),bar(before/g.steps.length),
