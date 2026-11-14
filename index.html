@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Engineer Practical Trainer</title>
+<style>
+:root{
+  --bg:#f4f2ee; --card:#ffffff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded6;
+  --accent:#b3261e; --accent-ink:#ffffff; --good:#1f7a3d; --good-bg:#e3f3e7;
+  --bad:#b3261e; --bad-bg:#fbe6e4; --track:#e7e3db; --gold:#c98a00;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141312; --card:#1f1e1c; --ink:#f1eee8; --muted:#a39f97; --line:#34322e;
+    --accent:#e2574c; --accent-ink:#1a0705; --good:#5fca83; --good-bg:#173022;
+    --bad:#f0857c; --bad-bg:#3a1b18; --track:#2e2c29; --gold:#e6b23c;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+#app{max-width:560px;margin:0 auto;padding:12px 16px calc(32px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:10px;min-height:48px;margin-bottom:8px}
+.top h1{font-size:18px;margin:0;flex:1;line-height:1.2}
+.back{border:0;background:none;color:var(--ink);font-size:26px;line-height:1;padding:6px 10px 8px 0;cursor:pointer}
+.pill{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+button.card{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+button.card:active{transform:scale(.99)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.title{font-weight:650}
+.sub{color:var(--muted);font-size:13px}
+.bar{height:8px;background:var(--track);border-radius:99px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.bar.done i{background:var(--good)}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:14px 16px;font:inherit;font-weight:650;cursor:pointer;background:var(--accent);color:var(--accent-ink);margin:10px 0}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn:active{transform:scale(.99)}
+.btn small{display:block;font-weight:400;opacity:.85;font-size:13px}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 4px}
+.ctx{color:var(--muted);font-size:15px;margin:2px 0}
+.q{font-size:20px;font-weight:650;margin:14px 0 10px}
+.opt{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;margin:8px 0;cursor:pointer}
+.opt.right{border-color:var(--good);background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt:disabled{cursor:default;color:inherit;opacity:1}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.steps{list-style:none;margin:0;padding:0}
+.steps li{padding:7px 0;border-bottom:1px solid var(--line)}
+.steps li:last-child{border-bottom:0}
+.d1{padding-left:18px!important}.d2{padding-left:36px!important}.d3{padding-left:54px!important}
+.miss{color:var(--bad)}.hit{color:var(--good)}
+.blank{color:var(--muted);letter-spacing:.08em}
+.seg{display:flex;gap:6px;margin:10px 0}
+.seg button{flex:1;font:inherit;font-size:14px;padding:9px 4px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+input[type=text]{width:100%;font:inherit;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.msg{min-height:22px;font-size:14px;color:var(--muted);margin:6px 2px}
+.big{font-size:44px;font-weight:750;text-align:center;margin:18px 0 0}
+.center{text-align:center}
+.foot{color:var(--muted);font-size:12px;margin-top:28px;text-align:center}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:12px;cursor:pointer}
+.prog{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- Content: 2026 Engineer Bibliography, Engineer Practical Exam (pp. 65-81) ---------- */
+/* A leading ">" marks one level of indent under the line above it. */
+const DATA=[
+{id:'daily',title:'Pre-Trip Inspection: Daily',groups:[
+ {title:'Morning Handoff',lines:['Get verbal report from off-coming Engineer','Confirm apparatus ID number','Check systems for apparatus repair tickets']},
+ {title:'Approaching the Apparatus',lines:['Check to see if the apparatus leans to one side','Look for obvious leaks','Look for new damage to the apparatus','Ensure the parking brake is set']},
+ {title:'Engine Compartment',lines:['Leaks (oils, coolant, or fuel)','Listen for exhaust or air leaks','Oil level (should be at least 30 min after shutdown)','Coolant level (cold engine) or look through sight glass','Power steering fluid','Check transmission fluid on Allison Transmission Shift Pad','Belts','Hoses','Damaged wiring','Engine compartment lights','Batteries and cables']},
+ {title:'Inside Cab: before starting',lines:['Adjust the seat','Adjust the mirrors','Adjust the steering wheel','Check truck mileage','Check truck hours','Check the windshield for damage and cleanliness','Check for general cleanliness and condition of upholstery','Check the siren(s)','Check the horn(s)','Check the radios for channels and volume','Check other books','Check for fuel card or key','Check for the passport and update','Check all hose tags and other accountability equipment']},
+ {title:'Inside Cab: engine running',lines:['Start the apparatus','Check the steering wheel for less than 10 degrees play to right or left with engine running','Check all gauges','>Oil pressure','>Ammeter or voltmeter','>Fuel level','>Air pressure','>Tachometer','>Speedometer','>Transmission temperature','>Engine temperature','Check the dash lights','Check for MIL (Malfunction Indicator Light) or CEL (Check Engine Lights) or warnings','Check the cab lights','Check the wipers','Check the heater, defroster, and AC','Check the compartment door open warning light / buzzer']},
+ {title:'Inside Cab: lights check',lines:['Turn on the:','>Emergency lights','>Headlights','>Four-way flashers','Exit the cab and check all:','>Emergency lights','>Headlights (high and low beam)','>Taillights','>Four-way flashers','>Clearance lights','>Reflectors','>Spotlights','>Scene lights','Return to the cab','>Turn off the four-way flashers','>Turn off the emergency lights','>Turn on the turn signals one at a time and check for operation','>Have an assistant go to the rear of the apparatus','>>Check the brake lights','>>Check the back-up lights and alarm','Ensure all discharge and bleeder valves are closed','Place truck into pump gear and go to the pump panel']},
+ {title:'Pump Panel',lines:['Check all the gauges','>Oil pressure','>Water temperature','>Ammeter or Voltmeter','>Tachometer','>Intake','>Discharges','Check the okay to pump light','Open the engine cooler','Open the tank to pump valve','Ensure PSG is on and in the PSI or pressure mode','Fully open the tank fill valve','Increase the throttle to approximately 150 psi','Close the tank fill valve','>The PSG should decrease the engine rpms to maintain 150 psi','Open the tank fill valve','>The PSG should increase the engine rpms to maintain 150 psi','Reduce throttle to idle','Check the panel lights','Check the water tank level','Check the foam tank level','Take truck out of pump gear','Return to the pump panel','>Operate all gates and valves','>Operate all bleeder valves']},
+ {title:'Tires',lines:['Check the condition of the tires and rims','>Check the sidewalls and the tread for damage or foreign objects','>Check the tread depth and condition','>>The minimum depth is 4/32 of an inch on the front','>>The minimum depth is 2/32 of an inch on the rear','>Check for rocks or foreign objects between the rear duals','>Make sure the rear duals are not touching each other','>Check the tire pressure in each tire','>>Inflate to manufacturers recommended pressure as listed on the apparatus information plate','>>This is NOT necessarily the maximum pressure listed on the tire','>Check the rim for damage','>Check all the lug nuts for loose or missing nuts','>Check the wheel seals for leaks']},
+ {title:'Compartments',lines:['Check all applicable EMS equipment','Firefighting equipment','>Check for all couplings and adaptors','>Check for all hydrant and spanner wrenches','>Check all hose for size, amount, and proper storage','>Check all nozzles for proper types, sizes, and settings','>Check all forcible entry equipment','>Check any power equipment','>Check all extrication equipment','>Check all fire extinguishers','>Check all foam equipment','>Check all salvage equipment','>Check all SCBAs and spare bottles','>Check all ladders','>Check operation of the inverter','Other equipment','>Cones','>Water cooler','>Hearing protection or headset','>Through the lock kit','>Lock out kit','>Absorbant']},
+ {title:'On Top of the Apparatus',lines:['Check the deck gun for proper operation and nozzles','Check the supply hose for proper amount and load','Check the 2 ½" and other hose for proper amount and load','Check the water tank level','Check the foam tank level','Active shooter bag','Bee suits','Water rescue bag']},
+ {title:'General',lines:['Wash apparatus','Clean windows and mirrors','Other cleaning as needed','Write up / deficiencies as routine or urgent in PS Trax','Note fluids added and quantity in PS Trax']}
+]},
+{id:'weekly',title:'Pre-Trip Inspection: Weekly',groups:[
+ {title:'Check Under Apparatus',lines:['Check the steering gear box for leaks or damage','Check the steering linkage for excessive play or damage','Check cab tilt cylinder sub frame for cracks, loose bolts','Check cab tilt system for hydraulic leaks','Check the springs for cracks, damage or missing nuts and bolts','Check the shocks for leaks and damage','Check the brake hoses and chambers (pods) for damage','Check the brake drums or rotors for damage','Check the bottom of the engine for damage or leaks','Check the bottom of the transmission for damage or leaks','Check the bottom of the transfer case for damage or leaks','Check the drive shaft(s)','>The driveline to the rear differential','>The driveline to the pump','Check the pump for damage or excessive leaks','Check the exhaust system for damage or exhaust leaks','Check the fuel tank for damage or leaks','Check the fuel lines for damage or leaks','Check any wiring for damage','Check the frame for cracks or damage','Check the mud flaps','Check for any other loose nuts, bolts, brackets, etc.','Drain air tanks or moisture, build air pressure back up then listen for air leaks']},
+ {title:'Air Brake Test: leakage and warnings',lines:['Place wheel chocks','Air leakage rate','>Air tanks full','>Level ground','>Engine off','>Power and ignition on (gauges and warning alarms must be operational)','>Release parking brake','>>Look at air gauges','>>>Loss rate should be less than 2 psi in one minute','>Apply firm pressure to the brake pedal','>>After initial drop, loss rate should be less than 3 psi in one minute','Low-pressure warning signal','>Continue to reduce the pressure by pumping the brake pedal','>>The low-pressure warning signal should activate at or before 60 psi','Automatic activation of spring brakes','>Continue to pump the brakes to reduce the pressure','>The parking brake knob should pop out between 20 - 40 psi']},
+ {title:'Air Brake Test: build-up and brake tests',lines:['Rate of pressure build-up','>Start the engine','>Throttle to approximately 1500 rpm or activate high idle','>Watch the rate of pressure build-up','>>The system should build to at least 85 psi within 45 seconds','Air compressor cut in / cut out pressures','>Allow the pressure to continue to build until compressor cuts off (air release)','>>Compressor should cut out at approximately 120 - 125 psi','>Once the compressor cuts off, release the park brake and pump brake pedal one pump at a time and watch the air gauges (or listen) to see when the air compressor cuts back on','>>Compressor should cut on at approx. 100 psi','Test parking brake','>Apply the parking brake','>Remove the wheel chocks','>Place the transmission into drive','>Gently apply the throttle to see if the parking brake holds','Test service brakes','>Release the parking brake','>Hold down brake pedal for service brakes with your left foot','>Place transmission in drive','>Gently apply throttle to see if brakes hold']},
+ {title:'General (weekly)',lines:['Wash the apparatus','Wax the apparatus','Clean the windows and mirrors','Wash and apply protectant to the tires','Wash and apply protectant to the plastics and vinyl','Vacuum the interior','Clean the equipment','Clean out the compartments','Any other cleaning as needed']}
+]},
+{id:'road',title:'Over the Road',groups:[
+ {title:'Turning',lines:['Check traffic looking left, right, and then left again','Signal your intent to turn','Check mirrors','Decelerate smoothly','Start the turn in left lane for left turns or the right lane for right turns','>If there are two left or right turn lanes use the one that provides the greatest arc for turning','Keep both hands on the wheel using hand over hand method','Take the turn at an appropriate speed','Complete the turn in left lane for left turns or the right lane for right turns','Cancel your signal after completing the turn','Check mirrors','Accelerate smoothly']},
+ {title:'Stopping at intersections',lines:['Decelerate smoothly','Use the secondary braking system','Leave a gap of one car length in front of you if in traffic','Stop with front bumper behind the stop line or stop sign','Make a full, complete stop','Keep the front wheels straight']},
+ {title:'Starting off',lines:['Check traffic looking left, right, and then left again','Accelerate smoothly','Check your mirrors']},
+ {title:'Driving through controlled intersections',lines:['Check traffic looking left, right, and then left again','Cover the brake pedal']},
+ {title:'Lane changes',lines:['Be sure there is adequate space to move into the lane','Signal your intent','Check your mirrors','Merge into the lane','Re-check your mirrors','Cancel your signal']},
+ {title:'General driving',lines:['Get the "big picture"','Keep your eyes moving. Move eyes every 2-3 seconds or so','Check your gauges frequently','Check your mirrors frequently','Use adequate following distance (2 - 3 seconds)','Keep two hands on the wheel','Drive the proper speed','Drive in the correct lane','>Left lane if two lanes','>Center lane if three lanes']},
+ {title:'Backing',lines:['Use a spotter','Use your emergency lights when backing','Use your mirrors','Roll down the windows or headset communications','If there is no spotter available','>Get out and walk around the apparatus','>Use your emergency lights','>Back as far as is comfortable and repeat sequence as needed']},
+ {title:'Secondary Braking',lines:['Be able to identify the type of secondary braking on the apparatus','Know its operation','Demonstrate the proper use','Know if or when it should be turned off']},
+ {title:'Code 3 Driving Rules',lines:['Max 10 mph over posted speed limit','Max 20 mph traveling left of center','Traveling left of center, stops at all lights regardless of color and stop signs','Posted speed limit through intersections on green and cover the brake pedal','Complete stop at all red lights and stop signs','Maximum speed on freeway is the speed limit','No code 3 on freeway except to clear traffic near the scene','Stop for school busses loading and unloading children','Drive 15 mph through a school zone and consider turning off code 3 lights and siren']}
+]},
+{id:'aerial',title:'Aerial Operations',groups:[
+ {title:'Apparatus Placement',lines:['Offensive fires','>In front to facilitate movement of equipment','Defensive or potentially defensive fires','>Place early in anticipation of defensive operations','>Place upwind when possible','>Placing on corner of multi-story building will allow access to two sides of the structure','>Place turntable even with where you expect to stop the fire','>Look for overhead obstructions','General','>30\' from building, or 1 ½ times the height of the building, whichever is greater','>Level terrain','>Hard surface']},
+ {title:'Cab Procedures (setting up)',lines:['Set parking brake','Place trans. into neutral','Ensure front wheel lock is on','Turn on cameras for outriggers','Activate aerial master','Activate aerial PTO switch','Check gauges','Recheck parking brake','Don a safety vest','Take a radio','Look before exiting the cab','Close your door']},
+ {title:'Stabilizing',lines:['Consider use of traffic cones','Place four ground plates','Turn on stabilizer power','Remove remote','Assure area of stabilizers travel is clear','Activate right or left stabilizers out and down','Activate other stabilizers out and down','Note: Lower high side first if on uneven ground','Lift until bulge comes out of rear tires','Check level indicators or use auto-level to level apparatus to within safe usable limits','Check all eight lights to insure proper stabilization','Shut off stabilizer power','Stow the remote']},
+ {title:'Raising the Aerial Device',lines:['Lower turntable access ladder','Go to the turntable','Turn on work lights as needed','Turn on and check intercom','Look for overhead obstructions','Set aerial speed to desired level (slow – normal – fast)','Check for overhead obstructions','Raise ladder','Check around the turntable','Deploy Monitor','Rotate ladder','Extend ladder','Check rung alignment if ladder is to be climbed']},
+ {title:'Pump Engagement',lines:['Engage pump if needed','>Move pump shift from road to pump','>Place transmission into drive','>>Listen for pump to engage','>>Check pump engaged lights','>>Check speedometer for reading','>>Check to see that throttle is disengaged']},
+ {title:'Lowering the Aerial Device',lines:['Open the waterway drain and leave nozzles open','Retract ladder','Look for overhead obstructions','Check around the turntable','Rotate ladder','Align for bedding with information on display screen','Lower ladder until bedded','Hold 3-5 seconds to further bed ladder','Turn off intercom','Turn off work lights if used','Stow monitor (ensure light indicator shows stowed)','Stow turntable access ladder']},
+ {title:'Retracting Stabilizers',lines:['Turn on power switch to activate stabilizers','Remove and operate remote control','Assure area of stabilizers travel is clear','Raise and retract the left or right stabilizers','Raise and retract the other side stabilizers','Turn off the stabilizer power','Close waterway drain','Stow ground plates']},
+ {title:'Cab Procedures (shutting down)',lines:['Disengage fire pump (if used)','>Place transmission into neutral','>Wait 3-5 seconds and check gauges','>Shift pump shift back to road','Turn off aerial PTO switch','Turn off aerial master switch','Adjust platform to level with button in cab']},
+ {title:'Miscellaneous',lines:['Check around apparatus for equipment and stow as necessary','Check all compartment doors for proper closure']}
+]},
+{id:'pump',title:'Pumping Operations (PSG)',groups:[
+ {title:'Laying Supply Line',lines:['Spot the tailboard at the hydrant','Wait, watch, and listen for firefighter to say to go','Lay the line along the curb the hydrant is on','Crossover at the fire if necessary','Maximum speed 15 mph','Slow to 3 - 5 mph on the fireground']},
+ {title:'Spotting the Apparatus',lines:['Place deck gun in a position to protect exposures as needed','Spot at least 30\' away from the structure or 1.5 times the height of the structure whichever is greater','Leave room for the ladder','Consider the fire attack location if no exposures','Provide the Captain a view of three sides','Attempt to park on concrete or blacktop','Do not park under power lines going to the structure']},
+ {title:'Cab Procedures',lines:['Place the transmission into "neutral"','Set the parking brake','Shift the transfer switch from "road" to "pump"','Place the transmission into drive','Listen, look for the lights, check the speedometer and check the throttle','Quickly check the gauges on the dash','Double check the parking brake','Take your radio','Don your safety vest','Watch for traffic before opening apparatus door','Close the apparatus door after exiting']},
+ {title:'Pumping on Tank Water',lines:['Place the hose clamp or ensure that the clamp is being applied if that is part of your operations','Place wheel chocks','Check the gauges on the pump panel','Check pump operation lights','If necessary, turn on PSG and place into pressure mode','Open the "tank-to-pump" valve','Calculate pressure for the first line','Check to see that the hose bed is clear','Ensure that the firefighters are ready for water','Slowly open the discharge gate','Increase the throttle to the calculated pressure']},
+ {title:'Change Over to Hydrant Water',lines:['Make pullbacks','Break supply line','Connect supply line to an intake','Open "air bleeder" valve','Release the hose clamp or have the hydrant opened','Close the "air bleeder" valve','Open the intake valve','Partially open "tank fill" valve to begin refilling the tank','Close the tank to pump valve']},
+ {title:'Additional Line: same as current engine pressure',lines:['Slowly open the new discharge gate fully','Allow the line to fill','Check gauges for the proper pump discharge pressures']},
+ {title:'Additional Line: less than current engine pressure',lines:['Slowly open the new discharge gate partially','Allow the line to fill','Wait for the new line to flow water','Adjust the new line\'s discharge gate to the calculated pressure','Check gauges for the proper pump discharge pressures']},
+ {title:'Additional Line: greater than current engine pressure',lines:['Slowly open the new discharge gate fully','Increase the throttle to the new line\'s pressure and adjust the other line(s) discharge gate(s) to the calculated pressure','Check gauges for the proper pump discharge pressures']},
+ {title:'Shut Down Procedures',lines:['Bring throttle to idle','Turn PSG to idle','Close the discharges','Bleed the pressure from the discharges','Open the "tank fill"','Check the gauges on the pump panel','Shut down the intake and the tank fill once the tank is full','Shut down the hydrant','Bleed the pressure from the supply line','Place the transmission into neutral and wait 3-5 seconds','Shift the transfer valve from "pump" to "road" and check the gauges for proper engine operation','Secure all the hose and equipment used during the incident']},
+ {title:'Troubleshooting: Pump Overheating',lines:['Take the truck out of pump gear when not pumping water','Open the "tank fill" valve to re-circulate water','Open any discharge and flow water from the pump']},
+ {title:'Troubleshooting: Engine Overheating',lines:['Open the indirect cooler(s) valve(s)','Open a small hand line or the red line and spray water directly on the radiator','If the overheating problem persists','>Notify Command','>Ensure that all interior crews are out of the structure','>SHUT DOWN TRUCK']},
+ {title:'Troubleshooting: Lost Prime on Tank Water',lines:['Cause: the pump is not in gear','>Return to the cab and reengage or engage the pump','Cause: the tank to pump valve is not open','>Open the tank to pump valve fully','Cause: the tank is empty','>Refill the water tank']},
+ {title:'Troubleshooting: Lost Hydrant Water Supply',lines:['Close the intake valve','Open the tank to pump valve','Shut down any exterior lines','Ensure the correct pump discharge pressure and adjust as needed','Notify Command by emergency traffic','Shut down the pump discharges AFTER all the interior crews are out of the structure and have a PAR','Shut down the hydrant','Replace the ruptured section of hose','Restart the pumping operation']}
+]}
+];
+
+/* Number facts: [question, answer, three wrong answers] */
+const NUMS=[
+['Minimum tread depth on the FRONT tires','4/32 of an inch',['2/32 of an inch','6/32 of an inch','1/8 of an inch']],
+['Minimum tread depth on the REAR tires','2/32 of an inch',['4/32 of an inch','1/32 of an inch','6/32 of an inch']],
+['Check the oil level at least how long after shutdown?','30 minutes',['10 minutes','15 minutes','60 minutes']],
+['Maximum steering wheel play with the engine running','Less than 10 degrees',['Less than 5 degrees','Less than 15 degrees','Less than 20 degrees']],
+['Daily pump panel check: increase the throttle to approximately','150 psi',['100 psi','125 psi','200 psi']],
+['Air leakage rate with the parking brake released','Less than 2 psi in one minute',['Less than 3 psi in one minute','Less than 4 psi in one minute','Less than 1 psi in one minute']],
+['Air leakage rate with firm pressure on the brake pedal (after the initial drop)','Less than 3 psi in one minute',['Less than 2 psi in one minute','Less than 4 psi in one minute','Less than 5 psi in one minute']],
+['The low-pressure warning signal should activate','At or before 60 psi',['At or before 45 psi','At or before 80 psi','At or before 100 psi']],
+['The parking brake knob should pop out between','20 - 40 psi',['40 - 60 psi','10 - 20 psi','60 - 80 psi']],
+['Rate of pressure build-up: the system should build to','At least 85 psi within 45 seconds',['At least 100 psi within 60 seconds','At least 85 psi within 2 minutes','At least 60 psi within 45 seconds']],
+['Throttle setting for the pressure build-up test','Approximately 1500 rpm or high idle',['Approximately 1000 rpm','Approximately 2000 rpm','Idle only']],
+['Air compressor should cut OUT at approximately','120 - 125 psi',['100 - 105 psi','110 - 115 psi','135 - 140 psi']],
+['Air compressor should cut back ON at approximately','100 psi',['85 psi','110 psi','120 psi']],
+['Code 3: maximum speed over the posted limit','10 mph over',['5 mph over','15 mph over','20 mph over']],
+['Code 3: maximum speed when traveling left of center','20 mph',['10 mph','15 mph','25 mph']],
+['Code 3: speed through a school zone','15 mph',['10 mph','20 mph','25 mph']],
+['Code 3: maximum speed on the freeway','The speed limit',['10 mph over the limit','5 mph over the limit','20 mph over the limit']],
+['Adequate following distance','2 - 3 seconds',['1 - 2 seconds','4 - 5 seconds','One car length']],
+['Keep your eyes moving: move them about every','2 - 3 seconds',['5 - 8 seconds','10 seconds','1 second']],
+['Stopping in traffic at an intersection: leave a gap of','One car length',['Half a car length','Two car lengths','10 feet']],
+['Aerial placement distance from the building','30\' or 1 ½ times the building height, whichever is greater',['30\' or 1 ½ times the building height, whichever is less','50\' or twice the building height, whichever is greater','20\' or the building height, whichever is greater']],
+['Stabilizing: how many ground plates are placed?','Four',['Two','Six','Eight']],
+['Stabilizing: how many lights confirm proper stabilization?','Eight',['Four','Six','Two']],
+['After lowering the ladder until bedded, hold for','3-5 seconds',['1-2 seconds','10 seconds','15 seconds']],
+['Disengaging the pump: after placing the transmission in neutral, wait','3-5 seconds',['1 second','10-15 seconds','30 seconds']],
+['Maximum speed when laying a supply line','15 mph',['5 mph','10 mph','25 mph']],
+['Slow to what speed on the fireground?','3 - 5 mph',['5 - 10 mph','10 - 15 mph','1 - 2 mph']],
+['Spot the engine at least how far from the structure?','30\' or 1.5 times the structure height, whichever is greater',['30\' or 1.5 times the structure height, whichever is less','50\' or the structure height, whichever is greater','15\' or 1.5 times the structure height, whichever is greater']],
+['Lost hydrant water supply: how many of the steps MUST be done as quickly as possible?','The first four',['The first two','The first three','All nine']],
+['Lost hydrant water supply: what is the FIRST step?','Close the intake valve',['Open the tank to pump valve','Notify Command by emergency traffic','Shut down the hydrant']]
+];
+
+/* ---------- Setup ---------- */
+const KEY='ept-v1';
+const ALL=[];
+DATA.forEach(s=>s.groups.forEach((g,gi)=>{
+  g.id=s.id+'-'+gi; g.sec=s;
+  g.steps=g.lines.map((l,i)=>{const d=l.match(/^>*/)[0].length;return{t:l.slice(d),d,i}});
+  ALL.push(g);
+}));
+let S={};
+try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+S.s=S.s||{};S.xp=S.xp||0;S.streak=S.streak||0;S.last=S.last||'';S.numBest=S.numBest||0;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const rec=(g,i,ok)=>{(S.s[g.id]=S.s[g.id]||{})[i]=ok?1:0;if(ok)S.xp+=10};
+const mastery=g=>{const m=S.s[g.id]||{};return g.steps.filter(st=>m[st.i]===1).length/g.steps.length};
+const secMastery=s=>{let a=0,b=0;s.groups.forEach(g=>{a+=mastery(g)*g.steps.length;b+=g.steps.length});return a/b};
+const day=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+function touchStreak(){
+  const t=day(new Date());if(S.last===t)return;
+  const y=new Date();y.setDate(y.getDate()-1);
+  S.streak=S.last===day(y)?S.streak+1:1;S.last=t;
+}
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+function $(t,a,...c){
+  const e=document.createElement(t);a=a||{};
+  for(const k in a){if(k==='class')e.className=a[k];else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),a[k]);else e.setAttribute(k,a[k])}
+  c.flat(Infinity).forEach(x=>{if(x!=null&&x!==false)e.append(x.nodeType?x:document.createTextNode(String(x)))});
+  return e;
+}
+const app=document.getElementById('app');
+const stack=[];
+function go(fn){stack.push(fn);draw()}
+function back(n){for(let i=0;i<(n||1)&&stack.length>1;i++)stack.pop();draw()}
+function draw(){app.replaceChildren(...stack[stack.length-1]().flat(Infinity).filter(x=>x!=null&&x!==false));window.scrollTo(0,0)}
+function hdr(title,right){
+  return $('div',{class:'top'},stack.length>1&&$('button',{class:'back','aria-label':'Back',onclick:()=>back()},'‹'),$('h1',{},title),right);
+}
+const bar=p=>$('div',{class:'bar'+(p>=1?' done':'')},$('i',{style:'width:'+Math.round(p*100)+'%'}));
+const pct=p=>Math.round(p*100)+'%';
+
+/* ---------- Screens ---------- */
+function home(){
+  const total=ALL.reduce((a,g)=>a+g.steps.length,0);
+  const done=ALL.reduce((a,g)=>a+mastery(g)*g.steps.length,0);
+  return [
+    hdr('Engineer Practical Trainer',$('span',{class:'pill'},'🔥 '+S.streak+' day'+(S.streak===1?'':'s'))),
+    $('div',{class:'card'},
+      $('div',{class:'row'},$('span',{class:'title'},'Overall'),$('span',{class:'sub'},Math.round(done)+' of '+total+' steps · '+S.xp+' XP')),
+      bar(done/total)),
+    $('button',{class:'btn',onclick:quickPlay},'Quick play',$('small',{},'Drills the part you know least')),
+    $('button',{class:'btn ghost',onclick:()=>go(numbers())},'Numbers round',$('small',{},'Pressures, speeds and distances'+(S.numBest?' · best '+S.numBest+'/10':''))),
+    $('h2',{},'Sections'),
+    DATA.map(s=>$('button',{class:'card',onclick:()=>go(()=>section(s))},
+      $('div',{class:'row'},$('span',{class:'title'},s.title),$('span',{class:'sub'},pct(secMastery(s)))),
+      bar(secMastery(s)))),
+    $('p',{class:'foot'},'Content from the 2026 Engineer Bibliography, pages 65-81. For crew study only; the current packet is always the authority. Progress is saved on this device. ',
+      $('button',{class:'link',onclick:()=>{if(confirm('Erase all progress on this device?')){S={s:{},xp:0,streak:0,last:'',numBest:0};save();draw()}}},'Reset progress'))
+  ];
+}
+function section(s){
+  return [hdr(s.title),
+    s.groups.map(g=>$('button',{class:'card',onclick:()=>go(()=>group(g))},
+      $('div',{class:'row'},$('span',{class:'title'},g.title),$('span',{class:'sub'},g.steps.length+' steps · '+pct(mastery(g)))),
+      bar(mastery(g))))];
+}
+function group(g){
+  const all=g.steps.map(s=>s.i);
+  return [hdr(g.title),
+    $('div',{class:'card'},$('div',{class:'row'},$('span',{class:'sub'},g.sec.title),$('span',{class:'sub'},pct(mastery(g))+' mastered')),bar(mastery(g))),
+    $('button',{class:'btn ghost',onclick:()=>go(study(g))},'Study',$('small',{},'Read it, then hide the words')),
+    $('button',{class:'btn',onclick:()=>go(nextDrill(g,all))},'What comes next?',$('small',{},'Pick the next step')),
+    $('button',{class:'btn',onclick:()=>go(orderDrill(g))},'Put in order',$('small',{},'Tap the shuffled steps in sequence')),
+    $('button',{class:'btn',onclick:()=>go(recallDrill(g))},'From memory',$('small',{},'Type every step you can remember'))];
+}
+function quickPlay(){
+  const sorted=ALL.slice().sort((a,b)=>mastery(a)-mastery(b));
+  const g=mastery(sorted[0])>=1?ALL[Math.floor(Math.random()*ALL.length)]:sorted[0];
+  const m=S.s[g.id]||{};
+  let idx=g.steps.filter(st=>m[st.i]!==1).map(st=>st.i);
+  if(!idx.length)idx=g.steps.map(st=>st.i);
+  go(nextDrill(g,idx.slice(0,10)));
+}
+
+/* Study: full text, first letters, or hidden (tap a line to reveal it) */
+function study(g){
+  let mode=0;const open=new Set();
+  const first=t=>t.split(' ').map(w=>w[0]+'·'.repeat(Math.min(3,Math.max(0,w.length-1)))).join(' ');
+  return function view(){
+    const seg=$('div',{class:'seg'},['Full text','First letters','Hidden'].map((n,i)=>
+      $('button',{class:mode===i?'on':'',onclick:()=>{mode=i;open.clear();draw()}},n)));
+    const list=$('ul',{class:'steps card'},g.steps.map(st=>{
+      const show=mode===0||open.has(st.i);
+      return $('li',{class:'d'+st.d+(show?'':' blank'),onclick:()=>{if(mode){open.has(st.i)?open.delete(st.i):open.add(st.i);draw()}}},
+        show?st.t:mode===1?first(st.t):'• • •');
+    }));
+    return [hdr(g.title),seg,mode?$('p',{class:'sub'},'Say each line, then tap it to check.'):null,list];
+  };
+}
+
+function ctxLines(g,i){
+  if(i===0)return [$('p',{class:'ctx'},'Start of "'+g.title+'"')];
+  return g.steps.slice(Math.max(0,i-3),i).map(s=>$('p',{class:'ctx d'+s.d},s.t));
+}
+
+/* What comes next: multiple choice through the listed steps */
+function nextDrill(g,idxs){
+  let q=0,right=0;const missed=[];
+  return function view(){
+    if(q>=idxs.length)return result(g,right,idxs.length,missed);
+    const st=g.steps[idxs[q]];
+    const used=new Set([st.t]);if(st.i>0)used.add(g.steps[st.i-1].t);
+    const pick=(pool,n)=>{const out=[];for(const t of shuffle(pool)){if(out.length>=n)break;if(!used.has(t)){used.add(t);out.push(t)}}return out};
+    let wrong=pick(g.steps.filter(s=>s.i>st.i).map(s=>s.t),2);
+    wrong=wrong.concat(pick(g.sec.groups.filter(x=>x!==g).flatMap(x=>x.steps.map(s=>s.t)),3-wrong.length));
+    wrong=wrong.concat(pick(g.steps.map(s=>s.t),3-wrong.length));
+    const nextBtn=$('button',{class:'btn',style:'display:none',onclick:()=>{q++;draw()}},'Next');
+    const opts=shuffle([st.t].concat(wrong)).map(t=>$('button',{class:'opt',onclick:e=>{
+      const ok=t===st.t;
+      opts.forEach(o=>{o.disabled=true;if(o.textContent===st.t)o.classList.add('right')});
+      if(ok){right++;setTimeout(()=>{q++;draw()},650)}
+      else{e.currentTarget.classList.add('wrong');missed.push(st.i);nextBtn.style.display='block'}
+      rec(g,st.i,ok);save();
+    }},t));
+    return [hdr(g.title,$('span',{class:'prog'},(q+1)+' / '+idxs.length)),bar(q/idxs.length),
+      $('div',{class:'card'},ctxLines(g,st.i)),$('p',{class:'q'},'What comes next?'),opts,nextBtn];
+  };
+}
+
+/* Put in order: tap shuffled steps in sequence, five at a time */
+function orderDrill(g){
+  const chunks=[];for(let i=0;i<g.steps.length;i+=5)chunks.push(g.steps.slice(i,i+5));
+  if(chunks.length>1&&chunks[chunks.length-1].length<2)chunks[chunks.length-2].push(...chunks.pop());
+  let c=0,k=0,right=0,slip=false,tiles=null;const missed=[];
+  return function view(){
+    if(c>=chunks.length)return result(g,right,g.steps.length,missed);
+    const ch=chunks[c];
+    if(!tiles)tiles=shuffle(ch.slice(k).map(s=>s.t));
+    const placed=$('ul',{class:'steps card'},ch[0].i>0&&k===0?ctxLines(g,ch[0].i).slice(-1):null,ch.slice(0,k).map(s=>$('li',{class:'d'+s.d},s.t)));
+    const btns=tiles.map((t,ti)=>$('button',{class:'opt',onclick:e=>{
+      const st=ch[k];
+      if(t===st.t){
+        if(slip)missed.push(st.i);else right++;
+        rec(g,st.i,!slip);save();slip=false;tiles.splice(ti,1);k++;
+        if(k>=ch.length){c++;k=0;tiles=null}
+        draw();
+      }else{slip=true;e.currentTarget.classList.remove('shake');void e.currentTarget.offsetWidth;e.currentTarget.classList.add('shake')}
+    }},t));
+    const before=chunks.slice(0,c).reduce((a,x)=>a+x.length,0)+k;
+    return [hdr(g.title,$('span',{class:'prog'},before+' / '+g.steps.length)),bar(before/g.steps.length),
+      $('p',{class:'q'},'Tap the steps in order'),(k>0||ch[0].i>0)?placed:null,btns];
+  };
+}
+
+/* From memory: type items, loose matching against the list */
+const STOP=new Set('check the all for and of to a an or is are on in your any be it its with as that if at from into this'.split(' '));
+const toks=t=>t.toLowerCase().replace(/[^a-z0-9/½ ]+/g,' ').split(' ').filter(w=>w&&!STOP.has(w)).map(w=>w.length>3?w.replace(/(es|s)$/,''):w);
+const same=(a,b)=>a===b||(a.length>=4&&b.length>=4&&(a.startsWith(b)||b.startsWith(a)));
+function matchScore(input,target){
+  const a=toks(input),b=toks(target.replace(/\([^)]*\)/g,' '));if(!a.length||!b.length)return{sc:0,exact:false};
+  const hit=b.filter(x=>a.some(y=>same(x,y))).length,used=a.filter(y=>b.some(x=>same(x,y))).length;
+  return{sc:used/a.length<0.5?0:hit/b.length,exact:hit>0&&used===a.length};
+}
+function recallDrill(g){
+  const found=new Set();let done=false,msg='';
+  return function view(){
+    if(done){
+      g.steps.forEach(s=>rec(g,s.i,found.has(s.i)));touchStreak();save();
+      return [hdr(g.title),$('p',{class:'big'},found.size+' / '+g.steps.length),
+        $('p',{class:'center sub'},found.size===g.steps.length?'Every step, from memory.':'The ones in red are the ones you missed.'),
+        $('ul',{class:'steps card'},g.steps.map(s=>$('li',{class:'d'+s.d+(found.has(s.i)?' hit':' miss')},s.t))),
+        $('button',{class:'btn',onclick:()=>{stack.pop();go(recallDrill(g))}},'Try again'),
+        $('button',{class:'btn ghost',onclick:()=>back()},'Done')];
+    }
+    const input=$('input',{type:'text',placeholder:'Type a step, then Enter',autocomplete:'off',autocapitalize:'off','aria-label':'Type a step'});
+    const submit=()=>{
+      const v=input.value.trim();if(!v)return;
+      let best=null,bs=0;const exact=[];
+      g.steps.forEach(s=>{if(found.has(s.i))return;const m=matchScore(v,s.t);if(m.exact)exact.push(s);if(m.sc>bs){bs=m.sc;best=s}});
+      /* a short answer counts when its words point at exactly one remaining step */
+      if(bs<0.5&&exact.length===1){best=exact[0];bs=1}
+      if(best&&bs>=0.5){found.add(best.i);msg='✓ '+best.t;if(found.size===g.steps.length)done=true}
+      else msg='No match for "'+v+'" (or you already have it).';
+      draw();
+    };
+    input.addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
+    setTimeout(()=>input.focus(),0);
+    return [hdr(g.title,$('span',{class:'prog'},found.size+' / '+g.steps.length)),bar(found.size/g.steps.length),
+      $('p',{class:'q'},'List every step you remember'),
+      $('p',{class:'sub'},'Any order, your own words. Key words are enough.'),
+      input,$('p',{class:'msg'},msg),
+      $('ul',{class:'steps card'},g.steps.map(s=>$('li',{class:'d'+s.d+(found.has(s.i)?'':' blank')},found.has(s.i)?s.t:'· · ·'))),
+      $('button',{class:'btn ghost',onclick:()=>{done=true;draw()}},'I\'m done, show what I missed')];
+  };
+}
+
+function result(g,right,total,missed){
+  touchStreak();save();
+  const uniq=[...new Set(missed)].sort((a,b)=>a-b);
+  return [hdr(g.title),$('p',{class:'big'},right+' / '+total),
+    $('p',{class:'center sub'},right===total?'Clean run.':'Missed steps are listed below.'),
+    uniq.length?$('ul',{class:'steps card'},uniq.map(i=>$('li',{class:'miss d'+g.steps[i].d},g.steps[i].t))):null,
+    uniq.length?$('button',{class:'btn',onclick:()=>{stack.pop();go(nextDrill(g,uniq))}},'Retry the ones I missed'):null,
+    $('button',{class:'btn ghost',onclick:()=>back()},'Done')];
+}
+
+/* Numbers round: ten quick questions */
+function numbers(){
+  const qs=shuffle(NUMS).slice(0,10);let q=0,right=0;
+  return (function(){
+    return function view(){
+      if(q>=qs.length){
+        if(right>S.numBest)S.numBest=right;S.xp+=right*10;touchStreak();save();
+        return [hdr('Numbers round'),$('p',{class:'big'},right+' / '+qs.length),
+          $('p',{class:'center sub'},'Best so far: '+S.numBest+' / 10'),
+          $('button',{class:'btn',onclick:()=>{stack.pop();go(numbers())}},'Play again'),
+          $('button',{class:'btn ghost',onclick:()=>back()},'Done')];
+      }
+      const [text,ans,wrong]=qs[q];
+      const nextBtn=$('button',{class:'btn',style:'display:none',onclick:()=>{q++;draw()}},'Next');
+      const opts=shuffle([ans].concat(wrong)).map(t=>$('button',{class:'opt',onclick:e=>{
+        opts.forEach(o=>{o.disabled=true;if(o.textContent===ans)o.classList.add('right')});
+        if(t===ans){right++;setTimeout(()=>{q++;draw()},650)}
+        else{e.currentTarget.classList.add('wrong');nextBtn.style.display='block'}
+      }},t));
+      return [hdr('Numbers round',$('span',{class:'prog'},(q+1)+' / '+qs.length)),bar(q/qs.length),$('p',{class:'q'},text),opts,nextBtn];
+    };
+  })();
+}
+
+/* go() expects a function that returns the screen; drills return such a function */
+const _go=go;
+go=function(fn){_go(fn)};
+_go(home);
+</script>
+</body>
+</html>
