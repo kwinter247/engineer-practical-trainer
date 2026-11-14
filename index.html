@@ -40,7 +40,16 @@ button.card:active{transform:scale(.99)}
 .btn:active{transform:scale(.99)}
 .btn small{display:block;font-weight:400;opacity:.85;font-size:13px}
 h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 4px}
-.ctx{color:var(--muted);font-size:15px;margin:2px 0}
+.ctx{color:var(--muted);font-size:14px;margin:2px 0 6px}
+.lbl{font-size:12px;font-weight:650;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:6px 0 2px}
+.lbl:first-child{margin-top:0}
+.prev{font-size:18px;font-weight:650;border-left:4px solid var(--accent);padding-left:10px}
+.mode .sub{margin-top:2px}
+.sec summary{list-style:none;cursor:pointer}
+.sec summary::-webkit-details-marker{display:none}
+.sec[open] summary{margin-bottom:8px}
+.grp{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:1px solid var(--line);padding:13px 0;cursor:pointer}
+.grp .sub{white-space:nowrap}
 .q{font-size:20px;font-weight:650;margin:14px 0 10px}
 .opt{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;margin:8px 0;cursor:pointer}
 .opt.right{border-color:var(--good);background:var(--good-bg)}
@@ -213,32 +222,44 @@ function home(){
     $('div',{class:'card'},
       $('div',{class:'row'},$('span',{class:'title'},'Overall'),$('span',{class:'sub'},Math.round(done)+' of '+total+' steps · '+S.xp+' XP')),
       bar(done/total)),
-    $('button',{class:'btn',onclick:quickPlay},'Quick play',$('small',{},'Drills the part you know least')),
-    $('button',{class:'btn ghost',onclick:()=>go(numbers())},'Numbers round',$('small',{},'Pressures, speeds and distances'+(S.numBest?' · best '+S.numBest+'/10':''))),
-    $('h2',{},'Sections'),
-    DATA.map(s=>$('button',{class:'card',onclick:()=>go(()=>section(s))},
-      $('div',{class:'row'},$('span',{class:'title'},s.title),$('span',{class:'sub'},pct(secMastery(s)))),
-      bar(secMastery(s)))),
+    $('h2',{},'How do you want to practice?'),
+    MODES.map(m=>$('button',{class:'card mode',onclick:()=>go(()=>pick(m))},
+      $('div',{class:'title'},m.name),$('div',{class:'sub'},m.desc))),
+    $('button',{class:'card mode',onclick:()=>go(numbers())},
+      $('div',{class:'title'},'Numbers round'),$('div',{class:'sub'},'Ten quick questions on pressures, speeds and distances'+(S.numBest?' · best '+S.numBest+'/10':''))),
+    $('button',{class:'btn',onclick:quickPlay},'Just start',$('small',{},'Picks the part you know least')),
     $('p',{class:'foot'},'Content from the 2026 Engineer Bibliography, pages 65-81. For crew study only; the current packet is always the authority. Progress is saved on this device. ',
       $('button',{class:'link',onclick:()=>{if(confirm('Erase all progress on this device?')){S={s:{},xp:0,streak:0,last:'',numBest:0};save();draw()}}},'Reset progress'))
   ];
 }
-function section(s){
-  return [hdr(s.title),
-    s.groups.map(g=>$('button',{class:'card',onclick:()=>go(()=>group(g))},
-      $('div',{class:'row'},$('span',{class:'title'},g.title),$('span',{class:'sub'},g.steps.length+' steps · '+pct(mastery(g)))),
-      bar(mastery(g))))];
+/* Practice styles: chosen first, then the part to practice */
+const MODES=[
+  {name:'Read and learn',desc:'See the steps, then hide the words and test yourself',start:g=>study(g)},
+  {name:'What comes next?',desc:'You are shown the previous step and pick the one that follows',start:g=>nextDrill(g,g.steps.map(s=>s.i))},
+  {name:'Put in order',desc:'Tap shuffled steps back into the right sequence',start:g=>orderDrill(g)},
+  {name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)}
+];
+let MODE=MODES[1],openSec=DATA[0].id;
+function pick(m){
+  MODE=m;
+  return [hdr(m.name),$('p',{class:'sub'},'Pick a part to practice. It starts as soon as you tap it.'),
+    DATA.map(s=>{
+      const d=$('details',{class:'card sec'},
+        $('summary',{},$('div',{class:'row'},$('span',{class:'title'},s.title),$('span',{class:'sub'},pct(secMastery(s)))),bar(secMastery(s))),
+        s.groups.map(g=>$('button',{class:'grp',onclick:()=>go(m.start(g))},
+          $('span',{},g.title),$('span',{class:'sub'},(mastery(g)>=1?'✓ ':'')+g.steps.length+' steps · '+pct(mastery(g))))));
+      if(s.id===openSec)d.open=true;
+      d.addEventListener('toggle',()=>{if(d.open)openSec=s.id});
+      return d;
+    })];
 }
-function group(g){
-  const all=g.steps.map(s=>s.i);
-  return [hdr(g.title),
-    $('div',{class:'card'},$('div',{class:'row'},$('span',{class:'sub'},g.sec.title),$('span',{class:'sub'},pct(mastery(g))+' mastered')),bar(mastery(g))),
-    $('button',{class:'btn ghost',onclick:()=>go(study(g))},'Study',$('small',{},'Read it, then hide the words')),
-    $('button',{class:'btn',onclick:()=>go(nextDrill(g,all))},'What comes next?',$('small',{},'Pick the next step')),
-    $('button',{class:'btn',onclick:()=>go(orderDrill(g))},'Put in order',$('small',{},'Tap the shuffled steps in sequence')),
-    $('button',{class:'btn',onclick:()=>go(recallDrill(g))},'From memory',$('small',{},'Type every step you can remember'))];
+/* Button that moves on to the following part in the same practice style */
+function nextPart(g,primary){
+  const n=ALL[ALL.indexOf(g)+1];if(!n)return null;
+  return $('button',{class:'btn'+(primary?'':' ghost'),onclick:()=>{stack.pop();openSec=n.sec.id;go(MODE.start(n))}},'Next part',$('small',{},n.title));
 }
 function quickPlay(){
+  MODE=MODES[1];
   const sorted=ALL.slice().sort((a,b)=>mastery(a)-mastery(b));
   const g=mastery(sorted[0])>=1?ALL[Math.floor(Math.random()*ALL.length)]:sorted[0];
   const m=S.s[g.id]||{};
@@ -259,13 +280,17 @@ function study(g){
       return $('li',{class:'d'+st.d+(show?'':' blank'),onclick:()=>{if(mode){open.has(st.i)?open.delete(st.i):open.add(st.i);draw()}}},
         show?st.t:mode===1?first(st.t):'• • •');
     }));
-    return [hdr(g.title),seg,mode?$('p',{class:'sub'},'Say each line, then tap it to check.'):null,list];
+    return [hdr(g.title),seg,mode?$('p',{class:'sub'},'Say each line, then tap it to check.'):null,list,nextPart(g,true)];
   };
 }
 
-function ctxLines(g,i){
-  if(i===0)return [$('p',{class:'ctx'},'Start of "'+g.title+'"')];
-  return g.steps.slice(Math.max(0,i-3),i).map(s=>$('p',{class:'ctx d'+s.d},s.t));
+/* Card that states the step just before the one being asked */
+function prevCard(g,i){
+  if(i===0)return $('div',{class:'card'},$('div',{class:'lbl'},g.title),$('div',{class:'prev'},'You are at the very start of this part.'));
+  const earlier=g.steps.slice(Math.max(0,i-3),i-1);
+  return $('div',{class:'card'},
+    earlier.length?[$('div',{class:'lbl'},'Before that'),earlier.map(s=>$('div',{class:'ctx'},s.t))]:null,
+    $('div',{class:'lbl'},'Previous step'),$('div',{class:'prev'},g.steps[i-1].t));
 }
 
 /* What comes next: multiple choice through the listed steps */
@@ -288,7 +313,7 @@ function nextDrill(g,idxs){
       rec(g,st.i,ok);save();
     }},t));
     return [hdr(g.title,$('span',{class:'prog'},(q+1)+' / '+idxs.length)),bar(q/idxs.length),
-      $('div',{class:'card'},ctxLines(g,st.i)),$('p',{class:'q'},'What comes next?'),opts,nextBtn];
+      prevCard(g,st.i),$('p',{class:'q'},st.i===0?'What is the first step?':'What comes next?'),opts,nextBtn];
   };
 }
 
@@ -301,7 +326,8 @@ function orderDrill(g){
     if(c>=chunks.length)return result(g,right,g.steps.length,missed);
     const ch=chunks[c];
     if(!tiles)tiles=shuffle(ch.slice(k).map(s=>s.t));
-    const placed=$('ul',{class:'steps card'},ch[0].i>0&&k===0?ctxLines(g,ch[0].i).slice(-1):null,ch.slice(0,k).map(s=>$('li',{class:'d'+s.d},s.t)));
+    const placed=k>0?$('ul',{class:'steps card'},ch.slice(0,k).map(s=>$('li',{class:'d'+s.d},s.t))):
+      ch[0].i>0?$('div',{class:'card'},$('div',{class:'lbl'},'Continues after'),$('div',{class:'prev'},g.steps[ch[0].i-1].t)):null;
     const btns=tiles.map((t,ti)=>$('button',{class:'opt',onclick:e=>{
       const st=ch[k];
       if(t===st.t){
@@ -313,7 +339,7 @@ function orderDrill(g){
     }},t));
     const before=chunks.slice(0,c).reduce((a,x)=>a+x.length,0)+k;
     return [hdr(g.title,$('span',{class:'prog'},before+' / '+g.steps.length)),bar(before/g.steps.length),
-      $('p',{class:'q'},'Tap the steps in order'),(k>0||ch[0].i>0)?placed:null,btns];
+      $('p',{class:'q'},'Tap the steps in order'),placed,btns];
   };
 }
 
@@ -334,8 +360,9 @@ function recallDrill(g){
       return [hdr(g.title),$('p',{class:'big'},found.size+' / '+g.steps.length),
         $('p',{class:'center sub'},found.size===g.steps.length?'Every step, from memory.':'The ones in red are the ones you missed.'),
         $('ul',{class:'steps card'},g.steps.map(s=>$('li',{class:'d'+s.d+(found.has(s.i)?' hit':' miss')},s.t))),
-        $('button',{class:'btn',onclick:()=>{stack.pop();go(recallDrill(g))}},'Try again'),
-        $('button',{class:'btn ghost',onclick:()=>back()},'Done')];
+        $('button',{class:'btn'+(found.size===g.steps.length?' ghost':''),onclick:()=>{stack.pop();go(recallDrill(g))}},'Try again'),
+        nextPart(g,found.size===g.steps.length),
+        $('button',{class:'btn ghost',onclick:()=>back()},'Back to the list')];
     }
     const input=$('input',{type:'text',placeholder:'Type a step, then Enter',autocomplete:'off',autocapitalize:'off','aria-label':'Type a step'});
     const submit=()=>{
@@ -366,7 +393,8 @@ function result(g,right,total,missed){
     $('p',{class:'center sub'},right===total?'Clean run.':'Missed steps are listed below.'),
     uniq.length?$('ul',{class:'steps card'},uniq.map(i=>$('li',{class:'miss d'+g.steps[i].d},g.steps[i].t))):null,
     uniq.length?$('button',{class:'btn',onclick:()=>{stack.pop();go(nextDrill(g,uniq))}},'Retry the ones I missed'):null,
-    $('button',{class:'btn ghost',onclick:()=>back()},'Done')];
+    nextPart(g,!uniq.length),
+    $('button',{class:'btn ghost',onclick:()=>back()},'Back to the list')];
 }
 
 /* Numbers round: ten quick questions */
