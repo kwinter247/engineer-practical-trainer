@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Engineer Practical Trainer</title>
+<meta name="theme-color" content="#0E1318">
+<script>
+/* Set the theme before anything is drawn, so the page never shows the wrong colours first */
+(function(){var t='';try{t=localStorage.getItem('ept-theme')||''}catch(e){}
+if(!t)t=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+document.documentElement.setAttribute('data-theme',t);})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Saira:wght@600&display=swap" rel="stylesheet">
@@ -21,6 +28,8 @@
   }
 *{box-sizing:border-box}
 html,body{margin:0}
+html{background:var(--bg);overflow-x:clip;scrollbar-width:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar{display:none}
 :root{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
 #app{max-width:560px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16pxcalc(32px + env(safe-area-inset-bottom))}
@@ -233,7 +242,11 @@ DATA.forEach(s=>s.groups.forEach((g,gi)=>{
 let THEME='';
 try{THEME=localStorage.getItem('ept-theme')||''}catch(e){}
 if(!THEME)THEME=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
-const applyTheme=()=>{document.documentElement.dataset.theme=THEME};
+const applyTheme=()=>{
+  document.documentElement.dataset.theme=THEME;
+  const m=document.querySelector('meta[name=theme-color]');
+  if(m)m.setAttribute('content',THEME==='dark'?'#0E1318':'#EEF1F4');
+};
 applyTheme();
 function toggleTheme(){
   THEME=THEME==='dark'?'light':'dark';
@@ -242,7 +255,8 @@ function toggleTheme(){
 }
 /* Always open at the top: phones otherwise restore the last scroll position on reload */
 try{history.scrollRestoration='manual'}catch(e){}
-window.addEventListener('pageshow',()=>{window.scrollTo(0,0);setTimeout(()=>window.scrollTo(0,0),60)});
+const toTop=()=>{if(window.scrollY>0)window.scrollTo(0,0)};
+window.addEventListener('pageshow',()=>{toTop();setTimeout(toTop,60)});
 let introDone=false;
 let S={};
 try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
@@ -269,7 +283,7 @@ const app=document.getElementById('app');
 const stack=[];
 function go(fn){stack.push(fn);draw()}
 function back(n){for(let i=0;i<(n||1)&&stack.length>1;i++)stack.pop();draw()}
-function draw(){app.replaceChildren(...stack[stack.length-1]().flat(Infinity).filter(x=>x!=null&&x!==false));window.scrollTo(0,0)}
+function draw(){app.replaceChildren(...stack[stack.length-1]().flat(Infinity).filter(x=>x!=null&&x!==false));toTop()}
 function hdr(title,right){
   return $('div',{class:'top'},stack.length>1&&$('button',{class:'back','aria-label':'Back',onclick:()=>back()},'‹'),$('h1',{},title),right);
 }
