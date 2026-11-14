@@ -77,7 +77,7 @@ button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:
 }
 @media (prefers-reduced-motion: reduce){.c3t b,.brand.intro h1,.brand.intro .c3t{animation:none}}
 .rank{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
-.badge{width:56px;height:56px;border-radius:50%;background:var(--card);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
+.badge{width:56px;height:56px;border-radius:50%;background:var(--card);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);flex:none}
 .bar.gold{margin-top:5px}.bar.gold i{background:var(--gold)}
 .mis{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:15px}
 .mis .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none}
@@ -86,14 +86,16 @@ button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 10px}
 .tile{border:0;border-radius:14px;padding:14px 12px;font:inherit;font-weight:650;text-align:left;display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .tile:active{transform:scale(.98)}
-.tile .ico{font-size:24px;line-height:1}
+.ic{display:inline-flex;vertical-align:-4px}
+.pill .ic{vertical-align:-2px}
+.tile .ic{color:var(--accent)}
 .tile.wide{flex-direction:row;align-items:center;gap:10px;width:100%;margin-bottom:10px}
 .sub2{font-size:13px;font-weight:400;opacity:.85}
 .upnext{background:var(--t-coral);color:var(--t-coral-ink);border-radius:14px;padding:14px;margin:6px 0 18px}
 .stop{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:4px 0;cursor:pointer}
-.node{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none;background:var(--track)}
-.stop.todo .node{filter:grayscale(1);opacity:.7}
-.stop.now .node{background:var(--accent);box-shadow:0 0 0 4px var(--t-coral)}
+.node{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);flex:none;background:var(--track)}
+.stop.todo .node{opacity:.8}
+.stop.now .node{background:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px var(--t-coral)}
 .stop.done .node{background:var(--good-bg);color:var(--good);font-weight:800}
 .stop .bar{margin-top:5px}
 .link-line{width:3px;height:16px;background:var(--track);margin-left:24.5px;border-radius:2px}
@@ -290,6 +292,31 @@ function $(t,a,...c){
   return e;
 }
 const app=document.getElementById('app');
+/* Line icons, drawn in the current text colour */
+const IC={
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  flame:'<path d="M12 2c0 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-4 2-5 0 2 1 3 2 3 0-3 0-6 1-9z"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  truck:'<path d="M2 7h11v9H2zM13 10h5l3 3v3h-8z"/><circle cx="6.5" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+  book:'<path d="M12 6c-2-1.5-5-2-8-2v14c3 0 6 .5 8 2 2-1.5 5-2 8-2V4c-3 0-6 .5-8 2zM12 6v14"/>',
+  next:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  order:'<path d="M7 4v16M4 7l3-3 3 3M17 20V4M14 17l3 3 3-3"/>',
+  pencil:'<path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/>',
+  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  gauge:'<path d="M4 18a8 8 0 1 1 16 0M12 18l4-6M3 18h18"/>',
+  calendar:'<path d="M4 5h16v15H4zM4 10h16M8 3v4M16 3v4"/>',
+  road:'<path d="M6 21L9 3M18 21L15 3M12 5v3M12 11v3M12 17v3"/>',
+  ladder:'<path d="M8 3v18M16 3v18M8 7h8M8 12h8M8 17h8"/>',
+  drop:'<path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/>',
+  bolt:'<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+  check:'<path d="M5 12l5 5 9-10"/>'
+};
+function ic(name,size){
+  const e=document.createElement('span');e.className='ic';size=size||22;
+  e.innerHTML='<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[name]+'</svg>';
+  return e;
+}
 const stack=[];
 let onLeave=null;
 const leave=()=>{if(onLeave){const f=onLeave;onLeave=null;f()}};
@@ -334,27 +361,27 @@ function home(){
     $('div',{class:'brand'+(first?' intro':'')},$('h1',{},'Engineer Practical Trainer'),
       $('div',{class:'c3t','aria-label':'By Code 3 Tek'},'BY CODE',$('b',{},'3'),'TEK')),
     $('div',{class:'rank'},
-      $('div',{class:'badge'},'\u{1F6E1}️'),
+      $('div',{class:'badge'},ic('shield',30)),
       $('div',{style:'flex:1;min-width:0'},
         $('div',{class:'sub'},'Rank '+r.n),
         $('div',{class:'title',style:'font-size:17px'},r.name),
         $('div',{class:'bar gold'},$('i',{style:'width:'+Math.round(r.p*100)+'%'})),
         $('div',{class:'sub',style:'margin-top:3px'},r.next?(r.next[0]-S.xp)+' XP to '+r.next[1]:S.xp+' XP · top rank')),
       $('div',{style:'display:flex;flex-direction:column;align-items:flex-end;gap:6px'},
-        $('span',{class:'pill'},'\u{1F525} '+S.streak),
-        $('button',{class:'pill','aria-label':'Switch to '+(THEME==='dark'?'light':'dark')+' mode',onclick:toggleTheme},THEME==='dark'?'☀️ Light':'\u{1F319} Dark'))),
+        $('span',{class:'pill'},ic('flame',14),' '+S.streak),
+        $('button',{class:'pill','aria-label':'Switch to '+(THEME==='dark'?'light':'dark')+' mode',onclick:toggleTheme},ic(THEME==='dark'?'sun':'moon',14),THEME==='dark'?' Light':' Dark'))),
     $('div',{class:'card'},
       $('div',{class:'lbl'},"Today's missions"),
       MISSIONS.map((m,i)=>$('div',{class:'mis'+(d.paid[i]?' ok':'')},
         $('span',{class:'dot'},d.paid[i]?'✓':''),$('span',{style:'flex:1'},m[0]),$('span',{class:'xp'},'+'+m[1])))),
-    $('button',{class:'btn',onclick:()=>go(path)},'\u{1F692} Study path',$('small',{},'Work through every section in order')),
+    $('button',{class:'btn',onclick:()=>go(path)},ic('truck',20),' Study path',$('small',{},'Work through every section in order')),
     $('h2',{},'Or pick how to practice'),
     $('div',{class:'tiles'},MODES.slice(0,4).map(m=>$('button',{class:'tile '+m.cls,onclick:()=>go(()=>pick(m))},
-      $('span',{class:'ico'},m.ico),m.name))),
+      ic(m.ico,26),m.name))),
     $('button',{class:'tile wide t-blue',onclick:()=>go(()=>pick(MODES[4]))},
-      $('span',{class:'ico'},MODES[4].ico),$('span',{style:'flex:1'},MODES[4].name),$('span',{class:'sub2'},'Uses the microphone')),
+      ic(MODES[4].ico,24),$('span',{style:'flex:1'},MODES[4].name),$('span',{class:'sub2'},'Uses the microphone')),
     $('button',{class:'tile wide t-amber',onclick:()=>go(numbers())},
-      $('span',{class:'ico'},'⏱️'),$('span',{style:'flex:1'},'Numbers round'),
+      ic('gauge',24),$('span',{style:'flex:1'},'Numbers round'),
       $('span',{class:'sub2'},S.numBest?'Best '+S.numBest+' of 10':'Pressures and speeds')),
     $('div',{class:'card'},
       $('div',{class:'row'},$('span',{class:'title'},'Exam readiness'),$('span',{class:'sub'},pct(overall())+' · '+S.xp+' XP')),
@@ -365,7 +392,7 @@ function home(){
 }
 
 /* Study path: the five sections in order, with one Continue card for what is next */
-const SEC_ICO={daily:'\u{1F692}',weekly:'\u{1F527}',road:'\u{1F6E3}️',aerial:'\u{1FA9C}',pump:'\u{1F4A7}'};
+const SEC_ICO={daily:'truck',weekly:'calendar',road:'road',aerial:'ladder',pump:'drop'};
 function path(){
   const nextG=ALL.find(g=>mastery(g)<1);
   const cont=()=>{
@@ -381,27 +408,27 @@ function path(){
     const stars=p>=1?3:p>=0.67?2:p>=0.34?1:0;
     if(n)nodes.push($('div',{class:'link-line'+(secMastery(DATA[n-1])>=1?' done':'')}));
     nodes.push($('button',{class:'stop '+state,onclick:()=>{openSec=s.id;go(()=>pick(MODES[1]))}},
-      $('span',{class:'node'},state==='done'?'✓':SEC_ICO[s.id]),
+      $('span',{class:'node'},ic(state==='done'?'check':SEC_ICO[s.id],24)),
       $('span',{style:'flex:1;min-width:0'},
         $('span',{class:'title',style:'display:block'},s.title),
         state==='now'?bar(p):null,
         $('span',{class:'sub',style:'display:block;margin-top:3px'},done+' of '+s.groups.length+' parts'+(stars?' · '+'★'.repeat(stars)+'☆'.repeat(3-stars):'')))));
   });
-  return [hdr('Study path',$('span',{class:'pill'},'⚡ '+S.xp)),
+  return [hdr('Study path',$('span',{class:'pill'},ic('bolt',14),' '+S.xp)),
     $('div',{class:'upnext'},
       $('div',{class:'sub2'},nextG?'Up next':'All sections mastered'),
       $('div',{class:'title',style:'margin:2px 0 10px'},nextG?nextG.sec.title+': '+nextG.title:'Run it again from the top'),
-      $('button',{class:'btn',style:'margin:0',onclick:cont},'▶ Continue')),
+      $('button',{class:'btn',style:'margin:0',onclick:cont},'Continue ',ic('next',18))),
     nodes];
 }
 
 /* Practice styles: chosen first, then the part to practice */
 const MODES=[
-  {ico:'📖',cls:'t-blue',name:'Read and learn',desc:'See the steps, then hide the words and test yourself',start:g=>study(g)},
-  {ico:'➡️',cls:'t-coral',name:'What comes next?',desc:'You are shown the previous step and pick the one that follows',start:g=>nextDrill(g,g.steps.map(s=>s.i))},
-  {ico:'🔢',cls:'t-purple',name:'Put in order',desc:'Tap shuffled steps back into the right sequence',start:g=>orderDrill(g)},
-  {ico:'🧠',cls:'t-teal',name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)},
-  {ico:'🎤',cls:'t-blue',name:'Say it out loud',desc:'Recite the steps and it marks the ones you missed',start:g=>spokenDrill(g)}
+  {ico:'book',cls:'t-blue',name:'Read and learn',desc:'See the steps, then hide the words and test yourself',start:g=>study(g)},
+  {ico:'next',cls:'t-coral',name:'What comes next?',desc:'You are shown the previous step and pick the one that follows',start:g=>nextDrill(g,g.steps.map(s=>s.i))},
+  {ico:'order',cls:'t-purple',name:'Put in order',desc:'Tap shuffled steps back into the right sequence',start:g=>orderDrill(g)},
+  {ico:'pencil',cls:'t-teal',name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)},
+  {ico:'mic',cls:'t-blue',name:'Say it out loud',desc:'Recite the steps and it marks the ones you missed',start:g=>spokenDrill(g)}
 ];
 let MODE=MODES[1],openSec=DATA[0].id;
 function pick(m){
@@ -664,11 +691,11 @@ function spokenDrill(g){
     icon.innerHTML=on?'<svg viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>'
       :'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
     return [hdr(g.title,cntEl),b,
-      $('p',{class:'sub',style:'margin:10px 2px'},on?'Say every step in this part, in order. A short pause between steps helps.':'Tap Start listening at the bottom, then say every step in this part, in order.'),
+      $('p',{class:'sub',style:'margin:10px 2px'},on?'Say every step in this part, in order. A short pause between steps helps.':'Tap the button at the bottom, then say every step in this part, in order.'),
       err?$('p',{class:'msg miss'},err):null,
       $('ul',{class:'steps card',style:'margin-bottom:140px'},g.steps.map(s=>els[s.i]=$('li',{class:'d'+s.d+(found.has(s.i)?' hit':' blank')},found.has(s.i)?s.t:'· · ·'))),
       $('div',{class:'micbar'},liveEl,
-        $('button',{class:'micbtn',onclick:()=>on?finish():start()},icon,on?'Done, show what I missed':'Start listening'))];
+        $('button',{class:'micbtn',onclick:()=>on?finish():start()},icon,on?'Done, show what I missed':'Tap to start speaking'))];
   };
 }
 
