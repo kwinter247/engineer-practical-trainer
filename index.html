@@ -45,6 +45,33 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .lbl:first-child{margin-top:0}
 .prev{font-size:18px;font-weight:650;border-left:4px solid var(--accent);padding-left:10px}
 .mode .sub{margin-top:2px}
+:root{--t-blue:#E6F1FB;--t-blue-ink:#0C447C;--t-coral:#FAECE7;--t-coral-ink:#712B13;--t-purple:#EEEDFE;--t-purple-ink:#3C3489;--t-teal:#E1F5EE;--t-teal-ink:#085041;--t-amber:#FAEEDA;--t-amber-ink:#633806}
+@media (prefers-color-scheme: dark){:root{--t-blue:#0C447C;--t-blue-ink:#B5D4F4;--t-coral:#712B13;--t-coral-ink:#F5C4B3;--t-purple:#3C3489;--t-purple-ink:#CECBF6;--t-teal:#085041;--t-teal-ink:#9FE1CB;--t-amber:#633806;--t-amber-ink:#FAC775}}
+.t-blue{background:var(--t-blue);color:var(--t-blue-ink)}.t-coral{background:var(--t-coral);color:var(--t-coral-ink)}
+.t-purple{background:var(--t-purple);color:var(--t-purple-ink)}.t-teal{background:var(--t-teal);color:var(--t-teal-ink)}
+.t-amber{background:var(--t-amber);color:var(--t-amber-ink)}
+.rank{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
+.badge{width:56px;height:56px;border-radius:50%;background:var(--t-amber);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
+.bar.gold{margin-top:5px}.bar.gold i{background:var(--gold)}
+.mis{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:15px}
+.mis .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none}
+.mis.ok{color:var(--muted)}.mis.ok .dot{background:var(--good);border-color:var(--good);color:var(--card)}
+.mis .xp{color:var(--gold);font-weight:650;font-size:14px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 10px}
+.tile{border:0;border-radius:14px;padding:14px 12px;font:inherit;font-weight:650;text-align:left;display:flex;flex-direction:column;gap:6px;cursor:pointer}
+.tile:active{transform:scale(.98)}
+.tile .ico{font-size:24px;line-height:1}
+.tile.wide{flex-direction:row;align-items:center;gap:10px;width:100%;margin-bottom:10px}
+.sub2{font-size:13px;font-weight:400;opacity:.85}
+.upnext{background:var(--t-coral);color:var(--t-coral-ink);border-radius:14px;padding:14px;margin:6px 0 18px}
+.stop{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:4px 0;cursor:pointer}
+.node{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none;background:var(--track)}
+.stop.todo .node{filter:grayscale(1);opacity:.7}
+.stop.now .node{background:var(--accent);box-shadow:0 0 0 4px var(--t-coral)}
+.stop.done .node{background:var(--good-bg);color:var(--good);font-weight:800}
+.stop .bar{margin-top:5px}
+.link-line{width:3px;height:16px;background:var(--track);margin-left:24.5px;border-radius:2px}
+.link-line.done{background:var(--good)}
 .placed{display:flex;gap:10px;align-items:flex-start;background:var(--good-bg);border:1.5px solid var(--good);border-radius:12px;padding:11px 14px;margin:6px 0;font-weight:600}
 .tick{color:var(--good);font-weight:800}
 .pop{animation:pop .5s}
@@ -189,7 +216,7 @@ let S={};
 try{S=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
 S.s=S.s||{};S.xp=S.xp||0;S.streak=S.streak||0;S.last=S.last||'';S.numBest=S.numBest||0;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const rec=(g,i,ok)=>{(S.s[g.id]=S.s[g.id]||{})[i]=ok?1:0;if(ok)S.xp+=10};
+const rec=(g,i,ok)=>{(S.s[g.id]=S.s[g.id]||{})[i]=ok?1:0;if(ok){S.xp+=10;today().right++}};
 const mastery=g=>{const m=S.s[g.id]||{};return g.steps.filter(st=>m[st.i]===1).length/g.steps.length};
 const secMastery=s=>{let a=0,b=0;s.groups.forEach(g=>{a+=mastery(g)*g.steps.length;b+=g.steps.length});return a/b};
 const day=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
@@ -218,30 +245,98 @@ const bar=p=>$('div',{class:'bar'+(p>=1?' done':'')},$('i',{style:'width:'+Math.
 const pct=p=>Math.round(p*100)+'%';
 
 /* ---------- Screens ---------- */
-function home(){
+/* Rank, daily missions and readiness */
+const RANKS=[[0,'Probie'],[300,'Firefighter'],[1000,'Move-up engineer'],[2500,'Engineer'],[5000,'Master engineer']];
+function rank(){
+  let i=0;RANKS.forEach((r,n)=>{if(S.xp>=r[0])i=n});
+  const nx=RANKS[i+1];
+  return{n:i+1,name:RANKS[i][1],next:nx,p:nx?(S.xp-RANKS[i][0])/(nx[0]-RANKS[i][0]):1};
+}
+const MISSIONS=[
+  ['Finish 2 parts',50,d=>d.parts>=2],
+  ['Score 8 of 10 on a numbers round',30,d=>d.num>=8],
+  ['Get 25 steps right',40,d=>d.right>=25]
+];
+function today(){
+  const t=day(new Date());
+  if(!S.day||S.day.d!==t)S.day={d:t,parts:0,num:0,right:0,paid:[]};
+  return S.day;
+}
+/* Pays each mission's bonus once, the first time it is met that day */
+function missions(){const d=today();MISSIONS.forEach((m,i)=>{if(!d.paid[i]&&m[2](d)){d.paid[i]=1;S.xp+=m[1]}})}
+function overall(){
   const total=ALL.reduce((a,g)=>a+g.steps.length,0);
-  const done=ALL.reduce((a,g)=>a+mastery(g)*g.steps.length,0);
+  return ALL.reduce((a,g)=>a+mastery(g)*g.steps.length,0)/total;
+}
+
+function home(){
+  missions();save();
+  const r=rank(),d=today();
   return [
-    hdr('Engineer Practical Trainer',$('span',{class:'pill'},'🔥 '+S.streak+' day'+(S.streak===1?'':'s'))),
+    $('div',{class:'rank'},
+      $('div',{class:'badge'},'\u{1F6E1}️'),
+      $('div',{style:'flex:1;min-width:0'},
+        $('div',{class:'sub'},'Rank '+r.n),
+        $('div',{class:'title',style:'font-size:17px'},r.name),
+        $('div',{class:'bar gold'},$('i',{style:'width:'+Math.round(r.p*100)+'%'})),
+        $('div',{class:'sub',style:'margin-top:3px'},r.next?(r.next[0]-S.xp)+' XP to '+r.next[1]:S.xp+' XP · top rank')),
+      $('span',{class:'pill'},'\u{1F525} '+S.streak)),
     $('div',{class:'card'},
-      $('div',{class:'row'},$('span',{class:'title'},'Overall'),$('span',{class:'sub'},Math.round(done)+' of '+total+' steps · '+S.xp+' XP')),
-      bar(done/total)),
-    $('h2',{},'How do you want to practice?'),
-    MODES.map(m=>$('button',{class:'card mode',onclick:()=>go(()=>pick(m))},
-      $('div',{class:'title'},m.name),$('div',{class:'sub'},m.desc))),
-    $('button',{class:'card mode',onclick:()=>go(numbers())},
-      $('div',{class:'title'},'Numbers round'),$('div',{class:'sub'},'Ten quick questions on pressures, speeds and distances'+(S.numBest?' · best '+S.numBest+'/10':''))),
-    $('button',{class:'btn',onclick:quickPlay},'Just start',$('small',{},'Picks the part you know least')),
+      $('div',{class:'lbl'},"Today's missions"),
+      MISSIONS.map((m,i)=>$('div',{class:'mis'+(d.paid[i]?' ok':'')},
+        $('span',{class:'dot'},d.paid[i]?'✓':''),$('span',{style:'flex:1'},m[0]),$('span',{class:'xp'},'+'+m[1])))),
+    $('button',{class:'btn',onclick:()=>go(path)},'\u{1F692} Study path',$('small',{},'Work through every section in order')),
+    $('h2',{},'Or pick how to practice'),
+    $('div',{class:'tiles'},MODES.map(m=>$('button',{class:'tile '+m.cls,onclick:()=>go(()=>pick(m))},
+      $('span',{class:'ico'},m.ico),m.name))),
+    $('button',{class:'tile wide t-amber',onclick:()=>go(numbers())},
+      $('span',{class:'ico'},'⏱️'),$('span',{style:'flex:1'},'Numbers round'),
+      $('span',{class:'sub2'},S.numBest?'Best '+S.numBest+' of 10':'Pressures and speeds')),
+    $('div',{class:'card'},
+      $('div',{class:'row'},$('span',{class:'title'},'Exam readiness'),$('span',{class:'sub'},pct(overall())+' · '+S.xp+' XP')),
+      bar(overall())),
     $('p',{class:'foot'},'Content from the 2026 Engineer Bibliography, pages 65-81. For crew study only; the current packet is always the authority. Progress is saved on this device. ',
       $('button',{class:'link',onclick:()=>{if(confirm('Erase all progress on this device?')){S={s:{},xp:0,streak:0,last:'',numBest:0};save();draw()}}},'Reset progress'))
   ];
 }
+
+/* Study path: the five sections in order, with one Continue card for what is next */
+const SEC_ICO={daily:'\u{1F692}',weekly:'\u{1F527}',road:'\u{1F6E3}️',aerial:'\u{1FA9C}',pump:'\u{1F4A7}'};
+function path(){
+  const nextG=ALL.find(g=>mastery(g)<1);
+  const cont=()=>{
+    const g=nextG||ALL[0],m=S.s[g.id]||{};
+    let idx=g.steps.filter(st=>m[st.i]!==1).map(st=>st.i);
+    if(!idx.length)idx=g.steps.map(st=>st.i);
+    MODE=MODES[1];openSec=g.sec.id;go(nextDrill(g,idx));
+  };
+  const nodes=[];
+  DATA.forEach((s,n)=>{
+    const p=secMastery(s),done=s.groups.filter(g=>mastery(g)>=1).length;
+    const state=p>=1?'done':(nextG&&nextG.sec===s)?'now':'todo';
+    const stars=p>=1?3:p>=0.67?2:p>=0.34?1:0;
+    if(n)nodes.push($('div',{class:'link-line'+(secMastery(DATA[n-1])>=1?' done':'')}));
+    nodes.push($('button',{class:'stop '+state,onclick:()=>{openSec=s.id;go(()=>pick(MODES[1]))}},
+      $('span',{class:'node'},state==='done'?'✓':SEC_ICO[s.id]),
+      $('span',{style:'flex:1;min-width:0'},
+        $('span',{class:'title',style:'display:block'},s.title),
+        state==='now'?bar(p):null,
+        $('span',{class:'sub',style:'display:block;margin-top:3px'},done+' of '+s.groups.length+' parts'+(stars?' · '+'★'.repeat(stars)+'☆'.repeat(3-stars):'')))));
+  });
+  return [hdr('Study path',$('span',{class:'pill'},'⚡ '+S.xp)),
+    $('div',{class:'upnext'},
+      $('div',{class:'sub2'},nextG?'Up next':'All sections mastered'),
+      $('div',{class:'title',style:'margin:2px 0 10px'},nextG?nextG.sec.title+': '+nextG.title:'Run it again from the top'),
+      $('button',{class:'btn',style:'margin:0',onclick:cont},'▶ Continue')),
+    nodes];
+}
+
 /* Practice styles: chosen first, then the part to practice */
 const MODES=[
-  {name:'Read and learn',desc:'See the steps, then hide the words and test yourself',start:g=>study(g)},
-  {name:'What comes next?',desc:'You are shown the previous step and pick the one that follows',start:g=>nextDrill(g,g.steps.map(s=>s.i))},
-  {name:'Put in order',desc:'Tap shuffled steps back into the right sequence',start:g=>orderDrill(g)},
-  {name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)}
+  {ico:'📖',cls:'t-blue',name:'Read and learn',desc:'See the steps, then hide the words and test yourself',start:g=>study(g)},
+  {ico:'➡️',cls:'t-coral',name:'What comes next?',desc:'You are shown the previous step and pick the one that follows',start:g=>nextDrill(g,g.steps.map(s=>s.i))},
+  {ico:'🔢',cls:'t-purple',name:'Put in order',desc:'Tap shuffled steps back into the right sequence',start:g=>orderDrill(g)},
+  {ico:'🧠',cls:'t-teal',name:'From memory',desc:'Type every step you can remember, in your own words',start:g=>recallDrill(g)}
 ];
 let MODE=MODES[1],openSec=DATA[0].id;
 function pick(m){
@@ -366,7 +461,7 @@ function recallDrill(g){
   const found=new Set();let done=false,msg='';
   return function view(){
     if(done){
-      g.steps.forEach(s=>rec(g,s.i,found.has(s.i)));touchStreak();save();
+      g.steps.forEach(s=>rec(g,s.i,found.has(s.i)));today().parts++;missions();touchStreak();save();
       return [hdr(g.title),$('p',{class:'big'},found.size+' / '+g.steps.length),
         $('p',{class:'center sub'},found.size===g.steps.length?'Every step, from memory.':'The ones in red are the ones you missed.'),
         $('ul',{class:'steps card'},g.steps.map(s=>$('li',{class:'d'+s.d+(found.has(s.i)?' hit':' miss')},s.t))),
@@ -397,7 +492,7 @@ function recallDrill(g){
 }
 
 function result(g,right,total,missed){
-  touchStreak();save();
+  today().parts++;missions();touchStreak();save();
   const uniq=[...new Set(missed)].sort((a,b)=>a-b);
   return [hdr(g.title),$('p',{class:'big'},right+' / '+total),
     $('p',{class:'center sub'},right===total?'Clean run.':'Missed steps are listed below.'),
@@ -413,7 +508,7 @@ function numbers(){
   return (function(){
     return function view(){
       if(q>=qs.length){
-        if(right>S.numBest)S.numBest=right;S.xp+=right*10;touchStreak();save();
+        if(right>S.numBest)S.numBest=right;S.xp+=right*10;today().num=Math.max(today().num,right);missions();touchStreak();save();
         return [hdr('Numbers round'),$('p',{class:'big'},right+' / '+qs.length),
           $('p',{class:'center sub'},'Best so far: '+S.numBest+' / 10'),
           $('button',{class:'btn',onclick:()=>{stack.pop();go(numbers())}},'Play again'),
