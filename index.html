@@ -10,14 +10,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Saira:wght@600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#f4f2ee; --card:#ffffff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded6;
-  --accent:#b3261e; --accent-ink:#ffffff; --good:#1f7a3d; --good-bg:#e3f3e7;
-  --bad:#b3261e; --bad-bg:#fbe6e4; --track:#e7e3db; --gold:#c98a00;
+  --bg:#EEF1F4; --card:#ffffff; --ink:#131A22; --muted:#5E6C7C; --line:#D5DCE4;
+  --accent:#D8322A; --accent-ink:#ffffff; --good:#1f7a3d; --good-bg:#e3f3e7;
+  --bad:#b3261e; --bad-bg:#fbe6e4; --track:#DDE3EA; --gold:#6F7F92;
 }
 :root[data-theme="dark"]{
-    --bg:#141312; --card:#1f1e1c; --ink:#f1eee8; --muted:#a39f97; --line:#34322e;
-    --accent:#e2574c; --accent-ink:#1a0705; --good:#5fca83; --good-bg:#173022;
-    --bad:#f0857c; --bad-bg:#3a1b18; --track:#2e2c29; --gold:#e6b23c;
+    --bg:#0E1318; --card:#18202A; --ink:#E8EDF2; --muted:#8493A4; --line:#283340;
+    --accent:#EA3A2F; --accent-ink:#ffffff; --good:#5fca83; --good-bg:#16302A;
+    --bad:#f0857c; --bad-bg:#3A1B1C; --track:#283340; --gold:#8493A4;
   }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -47,9 +47,9 @@ h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute
 .lbl:first-child{margin-top:0}
 .prev{font-size:18px;font-weight:650;border-left:4px solid var(--accent);padding-left:10px}
 .mode .sub{margin-top:2px}
-:root{--t-blue:#E6F1FB;--t-blue-ink:#0C447C;--t-coral:#FAECE7;--t-coral-ink:#712B13;--t-purple:#EEEDFE;--t-purple-ink:#3C3489;--t-teal:#E1F5EE;--t-teal-ink:#085041;--t-amber:#FAEEDA;--t-amber-ink:#633806}
-:root[data-theme="dark"]{--t-blue:#0C447C;--t-blue-ink:#B5D4F4;--t-coral:#712B13;--t-coral-ink:#F5C4B3;--t-purple:#3C3489;--t-purple-ink:#CECBF6;--t-teal:#085041;--t-teal-ink:#9FE1CB;--t-amber:#633806;--t-amber-ink:#FAC775}
-.t-blue{background:var(--t-blue);color:var(--t-blue-ink)}.t-coral{background:var(--t-coral);color:var(--t-coral-ink)}
+:root{--t-blue:#DFE5EC;--t-blue-ink:#131A22;--t-purple:#DFE5EC;--t-purple-ink:#131A22;--t-teal:#DFE5EC;--t-teal-ink:#131A22;--t-amber:#DFE5EC;--t-amber-ink:#131A22;--t-coral:#FBE7E5;--t-coral-ink:#7A1A14}
+:root[data-theme="dark"]{--t-blue:#202B37;--t-blue-ink:#E8EDF2;--t-purple:#202B37;--t-purple-ink:#E8EDF2;--t-teal:#202B37;--t-teal-ink:#E8EDF2;--t-amber:#202B37;--t-amber-ink:#E8EDF2;--t-coral:#2C1B1E;--t-coral-ink:#F6C9C5}
+.t-blue{background:var(--t-blue);color:var(--t-blue-ink)}.t-coral{background:var(--t-blue);color:var(--t-blue-ink)}
 .t-purple{background:var(--t-purple);color:var(--t-purple-ink)}.t-teal{background:var(--t-teal);color:var(--t-teal-ink)}
 .t-amber{background:var(--t-amber);color:var(--t-amber-ink)}
 button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
@@ -58,12 +58,12 @@ button.pill{font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:
 .c3t{font-family:"Saira",system-ui,sans-serif;font-weight:600;font-size:13px;letter-spacing:.17em;color:#8493A4;margin-top:5px}
 .c3t b{font-weight:600;color:#EA3A2F}
 .rank{display:flex;align-items:center;gap:12px;margin:6px 0 12px}
-.badge{width:56px;height:56px;border-radius:50%;background:var(--t-amber);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
+.badge{width:56px;height:56px;border-radius:50%;background:var(--card);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:28px;flex:none}
 .bar.gold{margin-top:5px}.bar.gold i{background:var(--gold)}
 .mis{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:15px}
 .mis .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none}
 .mis.ok{color:var(--muted)}.mis.ok .dot{background:var(--good);border-color:var(--good);color:var(--card)}
-.mis .xp{color:var(--gold);font-weight:650;font-size:14px}
+.mis .xp{color:var(--accent);font-weight:650;font-size:14px}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 10px}
 .tile{border:0;border-radius:14px;padding:14px 12px;font:inherit;font-weight:650;text-align:left;display:flex;flex-direction:column;gap:6px;cursor:pointer}
 .tile:active{transform:scale(.98)}
